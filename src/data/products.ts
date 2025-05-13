@@ -1,0 +1,130 @@
+import { Product } from '@/types';
+
+export const FEATURED_PRODUCTS: Product[] = [
+  {
+    id: 'product-1',
+    name: 'Premium Leather Wallet',
+    description: 'Handcrafted genuine leather wallet with multiple card slots and RFID protection.',
+    price: 79.99,
+    currency: '$',
+    imageUrl: 'https://images.pexels.com/photos/2079451/pexels-photo-2079451.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    category: 'accessories',
+    featured: true,
+    bestseller: true,
+    new: false,
+    rating: 4.8,
+    reviews: 124,
+    stock: 35
+  },
+  {
+    id: 'product-2',
+    name: 'Minimalist Watch',
+    description: 'Elegant analog watch with a stainless steel case and premium leather strap.',
+    price: 149.99,
+    originalPrice: 199.99,
+    currency: '$',
+    imageUrl: 'https://images.pexels.com/photos/190819/pexels-photo-190819.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    category: 'watches',
+    featured: true,
+    bestseller: false,
+    new: true,
+    rating: 4.5,
+    reviews: 89,
+    stock: 12
+  },
+  {
+    id: 'product-3',
+    name: 'Designer Sunglasses',
+    description: 'UV protection sunglasses with premium acetate frames and polarized lenses.',
+    price: 129.99,
+    currency: '$',
+    imageUrl: 'https://images.pexels.com/photos/701877/pexels-photo-701877.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    category: 'accessories',
+    featured: true,
+    bestseller: false,
+    new: false,
+    rating: 4.3,
+    reviews: 56,
+    stock: 8
+  },
+  {
+    id: 'product-4',
+    name: 'Luxury Scented Candle',
+    description: 'Hand-poured soy wax candle with premium essential oils for a relaxing ambiance.',
+    price: 34.99,
+    currency: '$',
+    imageUrl: 'https://images.pexels.com/photos/4202325/pexels-photo-4202325.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    category: 'home',
+    featured: true,
+    bestseller: false,
+    new: true,
+    rating: 4.7,
+    reviews: 42,
+    stock: 20
+  }
+];
+
+export const ALL_PRODUCTS: Product[] = [
+  ...FEATURED_PRODUCTS,
+  {
+    id: 'product-5',
+    name: 'Premium Wireless Headphones',
+    description: 'High-quality sound with active noise cancellation and 30-hour battery life.',
+    price: 249.99,
+    currency: '$',
+    imageUrl: 'https://images.pexels.com/photos/577769/pexels-photo-577769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    category: 'electronics',
+    featured: false,
+    bestseller: true,
+    new: false,
+    rating: 4.9,
+    reviews: 203,
+    stock: 15
+  },
+  {
+    id: 'product-6',
+    name: 'Ceramic Coffee Mug Set',
+    description: 'Set of 4 handmade ceramic mugs, microwave and dishwasher safe.',
+    price: 49.99,
+    currency: '$',
+    imageUrl: 'https://images.pexels.com/photos/1566308/pexels-photo-1566308.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    category: 'home',
+    featured: false,
+    bestseller: false,
+    new: false,
+    rating: 4.2,
+    reviews: 32,
+    stock: 24
+  },
+  {
+    id: 'product-7',
+    name: 'Mechanical Keyboard',
+    description: 'Tactile mechanical keyboard with RGB backlighting and programmable keys.',
+    price: 129.99,
+    originalPrice: 149.99,
+    currency: '$',
+    imageUrl: 'https://images.pexels.com/photos/1772123/pexels-photo-1772123.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    category: 'electronics',
+    featured: false,
+    bestseller: false,
+    new: true,
+    rating: 4.6,
+    reviews: 78,
+    stock: 7
+  },
+  {
+    id: 'product-8',
+    name: 'Leather Travel Bag',
+    description: 'Full-grain leather weekend travel bag with compartments and reinforced handles.',
+    price: 299.99,
+    currency: '$',
+    imageUrl: 'https://images.pexels.com/photos/934070/pexels-photo-934070.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    category: 'bags',
+    featured: false,
+    bestseller: true,
+    new: false,
+    rating: 4.8,
+    reviews: 45,
+    stock: 5
+  }
+];
