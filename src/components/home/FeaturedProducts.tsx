@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import Container from '../ui/Container';
 import { ShoppingCart, Heart, Eye } from 'lucide-react';
@@ -79,6 +79,35 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, index, onAddToCart }) => {
+  const [isRotating, setIsRotating] = useState(false);
+  const rotationRef = useRef(0);
+  const animationRef = useRef<number>();
+
+  const startRotation = () => {
+    if (isRotating) return;
+    setIsRotating(true);
+    rotationRef.current = 0;
+    
+    const animate = () => {
+      if (!isRotating) return;
+      rotationRef.current += 2;
+      const element = document.getElementById(`product-${product.id}`);
+      if (element) {
+        element.style.transform = `rotateY(${rotationRef.current}deg)`;
+      }
+      animationRef.current = requestAnimationFrame(animate);
+    };
+    
+    animationRef.current = requestAnimationFrame(animate);
+  };
+
+  const stopRotation = () => {
+    setIsRotating(false);
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+  };
+
   return (
     <motion.div 
       className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow group"
@@ -88,13 +117,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index, onAddToCart }
       transition={{ duration: 0.5, delay: 0.1 * index }}
     >
       <div className="relative overflow-hidden">
-        <Link to={`/products/${product.id}`}>
-          <img 
-            src={product.imageUrl} 
-            alt={product.name}
-            className="w-full h-64 object-cover transform group-hover:scale-105 transition-transform duration-300"
-          />
-        </Link>
+        <div
+          id={`product-${product.id}`}
+          className="relative aspect-square transition-transform duration-500 transform-gpu preserve-3d"
+          onMouseEnter={startRotation}
+          onMouseLeave={stopRotation}
+        >
+          <Link to={`/products/${product.id}`}>
+            <img 
+              src={product.imageUrl} 
+              alt={product.name}
+              className="w-full h-64 object-cover backface-hidden"
+            />
+          </Link>
+        </div>
         
         {product.originalPrice && (
           <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
