@@ -3,11 +3,13 @@ import { ArrowRight, ShieldCheck, Award, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Button from '../ui/Button';
 import Container from '../ui/Container';
-import { Link } from 'react-router-dom';
 
 const Hero: React.FC = () => {
   return (
-    <section className="relative bg-gradient-to-br from-gray-900 via-primary-900 to-gray-900 text-white py-24 lg:py-32 overflow-hidden">
+    <section className="relative bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white py-24 lg:py-32 overflow-hidden">
+      <div className="absolute inset-0 bg-[url('https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')] bg-cover bg-center opacity-10"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-900/90 via-primary-800/90 to-primary-900/90"></div>
+      
       <Container className="relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <motion.div
@@ -16,10 +18,10 @@ const Hero: React.FC = () => {
             transition={{ duration: 0.5 }}
           >
             <div className="flex items-center gap-2 mb-6">
-              <span className="bg-accent-500/20 text-accent-400 px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-accent-500/20 text-accent-300 px-3 py-1 rounded-full text-sm font-medium">
                 Premium Quality
               </span>
-              <span className="bg-primary-500/20 text-primary-300 px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-white/10 text-white/90 px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm">
                 Trusted by 10k+ Customers
               </span>
             </div>
@@ -35,8 +37,7 @@ const Hero: React.FC = () => {
                 variant="primary" 
                 className="bg-accent-500 hover:bg-accent-600 text-gray-900 font-medium"
                 rightIcon={<ArrowRight size={20} />}
-                as={Link}
-                to="/products"
+                onClick={() => window.location.href = '/products'}
               >
                 Explore Products
               </Button>
@@ -44,8 +45,7 @@ const Hero: React.FC = () => {
                 size="lg" 
                 variant="outline" 
                 className="border-white text-white hover:bg-white/10"
-                as={Link}
-                to="/contact"
+                onClick={() => window.location.href = '/contact'}
               >
                 Schedule Consultation
               </Button>
@@ -81,7 +81,7 @@ const Hero: React.FC = () => {
                 alt="Business professionals collaborating" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-primary-900/60 to-transparent"></div>
             </div>
             <div className="absolute -bottom-6 -right-6 bg-white text-gray-900 rounded-lg p-6 shadow-xl">
               <div className="flex items-center gap-4">
@@ -98,7 +98,7 @@ const Hero: React.FC = () => {
         </div>
       </Container>
       
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-500/20 to-transparent"></div>
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
     </section>
   );
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Menu, X, Search, User } from 'lucide-react';
 import Container from '../ui/Container';
-import Button from '../ui/Button';
+import Logo from '../ui/Logo';
 import { useCart } from '@/contexts/CartContext';
 
 const Header: React.FC = () => {
@@ -28,17 +28,12 @@ const Header: React.FC = () => {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'
+        isScrolled ? 'bg-white/95 backdrop-blur-sm shadow-md py-2' : 'bg-transparent py-4'
       }`}
     >
       <Container>
         <div className="flex items-center justify-between">
-          <Link 
-            to="/" 
-            className="text-2xl font-serif font-bold text-primary-700"
-          >
-            LuxeCommerce
-          </Link>
+          <Logo />
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
@@ -67,7 +62,7 @@ const Header: React.FC = () => {
             <Link to="/cart" className="p-2 text-gray-700 hover:text-primary-600 transition-colors relative">
               <ShoppingCart size={20} />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-accent-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                   {totalItems}
                 </span>
               )}
@@ -79,7 +74,7 @@ const Header: React.FC = () => {
             <Link to="/cart" className="p-2 text-gray-700 relative">
               <ShoppingCart size={20} />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-accent-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                   {totalItems}
                 </span>
               )}
@@ -96,7 +91,7 @@ const Header: React.FC = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white shadow-lg absolute top-full left-0 right-0">
+        <div className="md:hidden bg-white/95 backdrop-blur-sm shadow-lg absolute top-full left-0 right-0">
           <div className="py-4 px-4 space-y-4">
             <Link 
               to="/" 
@@ -141,4 +136,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header;
+export default Header
