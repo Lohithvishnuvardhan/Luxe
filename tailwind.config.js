@@ -22,36 +22,36 @@ export default {
           950: '#0a0a0a',
         },
         secondary: {
-          50: '#f8f7f4',
-          100: '#f2efe8',
-          200: '#e5dfd1',
-          300: '#d4c8b0',
-          400: '#bca988',
-          500: '#D4AF37', // Gold
-          600: '#a88c2e',
-          700: '#8c6d26',
-          800: '#735824',
-          900: '#604a22',
-          950: '#352711',
+          50: '#fff9eb',
+          100: '#fef2d6',
+          200: '#fce4ad',
+          300: '#fbd584',
+          400: '#f9c65b',
+          500: '#D4AF37',
+          600: '#b38f24',
+          700: '#8c6d1b',
+          800: '#664f13',
+          900: '#40310a',
+          950: '#1a1305',
         },
         accent: {
-          50: '#fbf8eb',
-          100: '#f7f0d7',
-          200: '#efe1af',
-          300: '#e7d287',
-          400: '#dfc35f',
-          500: '#D4AF37', // Gold
-          600: '#aa8c2c',
-          700: '#806924',
-          800: '#55461f',
-          900: '#2b231f',
-          950: '#15110f',
+          50: '#fdfbed',
+          100: '#fcf7db',
+          200: '#f8edb7',
+          300: '#f5e493',
+          400: '#f1da6f',
+          500: '#D4AF37',
+          600: '#b38f24',
+          700: '#8c6d1b',
+          800: '#664f13',
+          900: '#40310a',
+          950: '#1a1305',
         },
         success: {
-          500: '#D4AF37', // Gold for consistency
+          500: '#D4AF37',
         },
         warning: {
-          500: '#D4AF37', // Gold for consistency
+          500: '#D4AF37',
         },
         error: {
           500: '#dc2626',
@@ -59,10 +59,12 @@ export default {
       },
       boxShadow: {
         'subtle': '0 2px 15px 0 rgba(0, 0, 0, 0.05)',
+        'gold': '0 4px 20px -2px rgba(212, 175, 55, 0.25)',
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.5s ease-in-out',
+        'shimmer': 'shimmer 2s linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -73,6 +75,13 @@ export default {
           '0%': { transform: 'translateY(20px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+      },
+      backgroundImage: {
+        'gradient-gold': 'linear-gradient(45deg, #D4AF37, #FFE5A0, #D4AF37)',
       },
     },
   },
