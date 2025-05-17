@@ -18,6 +18,11 @@ const ProductDetails: React.FC = () => {
     return navigate('/404');
   }
 
+  const handleBuyNow = () => {
+    addItem(product);
+    navigate('/checkout');
+  };
+
   return (
     <div className="py-24">
       <Container>
@@ -98,6 +103,14 @@ const ProductDetails: React.FC = () => {
                 className="flex-1"
               >
                 Add to Cart
+              </Button>
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={handleBuyNow}
+                className="flex-1"
+              >
+                Buy Now
               </Button>
               <Button
                 variant="outline"

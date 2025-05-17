@@ -94,8 +94,8 @@ const Products: React.FC = () => {
           </motion.div>
 
           <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="relative flex-1 min-w-[200px]">
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <input
                   type="text"
@@ -151,7 +151,7 @@ const Products: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {sortedProducts.map((product) => (
               <motion.div
                 key={product.id}
@@ -161,7 +161,7 @@ const Products: React.FC = () => {
                 className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md"
               >
                 <div 
-                  className="relative h-[300px] transition-all duration-300"
+                  className="relative h-[400px] transition-all duration-300"
                   ref={(el) => productRefs.current[product.id] = el}
                   onMouseMove={(e) => handleMouseMove(e, product.id)}
                   onMouseLeave={() => handleMouseLeave(product.id)}
@@ -190,13 +190,6 @@ const Products: React.FC = () => {
 
                   <div className="absolute bottom-4 right-4 flex flex-col gap-2" style={{ transform: 'translateZ(40px)' }}>
                     <button 
-                      onClick={() => addItem(product)}
-                      className="bg-white text-gray-900 p-2 rounded-full hover:bg-primary-600 hover:text-white transition-colors"
-                      aria-label="Add to cart"
-                    >
-                      <ShoppingCart size={18} />
-                    </button>
-                    <button 
                       className="bg-white text-gray-900 p-2 rounded-full hover:bg-primary-600 hover:text-white transition-colors"
                       aria-label="Add to wishlist"
                     >
@@ -212,20 +205,20 @@ const Products: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-4">
-                  <div className="flex justify-between items-start mb-2">
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-3">
                     <Link to={`/products/${product.id}`}>
-                      <h3 className="font-medium text-gray-900 hover:text-primary-600 transition-colors">
+                      <h3 className="text-xl font-medium text-gray-900 hover:text-primary-600 transition-colors">
                         {product.name}
                       </h3>
                     </Link>
                     <div className="flex items-center">
-                      <Star className="w-4 h-4 text-accent-500" />
+                      <Star className="w-5 h-5 text-accent-500" />
                       <span className="ml-1 text-sm text-gray-600">{product.rating}</span>
                     </div>
                   </div>
 
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                  <p className="text-gray-600 mb-4 line-clamp-2 text-lg">
                     {product.description}
                   </p>
 
@@ -233,26 +226,34 @@ const Products: React.FC = () => {
                     <div>
                       {product.originalPrice ? (
                         <div className="flex items-center gap-2">
-                          <span className="text-lg font-bold text-gray-900">
+                          <span className="text-2xl font-bold text-gray-900">
                             {product.currency}{product.price}
                           </span>
-                          <span className="text-sm text-gray-500 line-through">
+                          <span className="text-lg text-gray-500 line-through">
                             {product.currency}{product.originalPrice}
                           </span>
                         </div>
                       ) : (
-                        <span className="text-lg font-bold text-gray-900">
+                        <span className="text-2xl font-bold text-gray-900">
                           {product.currency}{product.price}
                         </span>
                       )}
                     </div>
-                    <button
-                      onClick={() => addItem(product)}
-                      className="text-sm bg-primary-600 hover:bg-primary-700 text-white py-2 px-4 rounded-md transition-colors flex items-center gap-2"
-                    >
-                      <ShoppingCart size={16} />
-                      Add
-                    </button>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => addItem(product)}
+                        className="text-base bg-primary-600 hover:bg-primary-700 text-white py-2 px-6 rounded-md transition-colors flex items-center justify-center gap-2"
+                      >
+                        <ShoppingCart size={18} />
+                        Cart
+                      </button>
+                      <Link
+                        to={`/products/${product.id}`}
+                        className="text-base bg-accent-500 hover:bg-accent-600 text-white py-3 px-6 rounded-md transition-colors text-center"
+                      >
+                        Buy Now
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </motion.div>
