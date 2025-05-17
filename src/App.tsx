@@ -10,6 +10,7 @@ import ProductDetails from './pages/ProductDetails';
 import FAQ from './pages/FAQ';
 import ShippingReturns from './pages/ShippingReturns';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import Profile from './pages/Profile';
 import Terms from './pages/Terms';
 import Blog from './pages/Blog';
 import NotFound from './pages/NotFound';
@@ -31,6 +32,7 @@ function App() {
             <Route path="/faq" element={<FAQ />} />
             <Route path="/shipping" element={<ShippingReturns />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="*" element={<NotFound />} />

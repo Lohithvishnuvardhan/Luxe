@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Menu, X, Search, User, Crown } from 'lucide-react';
+import { ShoppingCart, Menu, X, Search, User } from 'lucide-react';
 import Container from '../ui/Container';
 import { useCart } from '@/contexts/CartContext';
 
@@ -34,16 +34,13 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-between">
           <Link 
             to="/" 
-            className="flex items-center space-x-2"
+            className="text-2xl font-serif font-bold text-primary-600"
           >
-            <Crown className="w-8 h-8 text-accent-500 drop-shadow-sm" strokeWidth={1.5} />
-            <span className="text-2xl font-serif font-bold text-gray-900">
-              LuxeCommerce
-            </span>
+            LuxeCommerce
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-12">
+          <nav className="hidden md:flex items-center space-x-8">
             <Link to="/" className="font-medium text-gray-800 hover:text-accent-500 transition-colors">
               Home
             </Link>
@@ -59,18 +56,21 @@ const Header: React.FC = () => {
           </nav>
 
           {/* Desktop Actions */}
-          <div className="hidden md:flex items-center space-x-6">
-            <button className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-900 text-white hover:bg-accent-500 transition-all duration-300 transform hover:scale-105">
-              <Search size={18} />
-            </button>
-            <button className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-900 text-white hover:bg-accent-500 transition-all duration-300 transform hover:scale-105">
-              <User size={18} />
+          <div className="hidden md:flex items-center space-x-4">
+            <button className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300 transform hover:scale-105">
+              <Search size={20} />
             </button>
             <Link 
-              to="/cart" 
-              className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-900 text-white hover:bg-accent-500 transition-all duration-300 transform hover:scale-105 relative"
+              to="/profile"
+              className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300 transform hover:scale-105"
             >
-              <ShoppingCart size={18} />
+              <User size={20} />
+            </Link>
+            <Link 
+              to="/cart" 
+              className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300 transform hover:scale-105 relative"
+            >
+              <ShoppingCart size={20} />
               {totalItems > 0 && (
                 <span className="absolute -top-1 -right-1 bg-accent-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                   {totalItems}
@@ -83,9 +83,9 @@ const Header: React.FC = () => {
           <div className="flex items-center space-x-4 md:hidden">
             <Link 
               to="/cart" 
-              className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-900 text-white hover:bg-accent-500 transition-all duration-300 relative"
+              className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300 relative"
             >
-              <ShoppingCart size={18} />
+              <ShoppingCart size={20} />
               {totalItems > 0 && (
                 <span className="absolute -top-1 -right-1 bg-accent-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                   {totalItems}
@@ -94,9 +94,9 @@ const Header: React.FC = () => {
             </Link>
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-900 text-white hover:bg-accent-500 transition-all duration-300"
+              className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300"
             >
-              {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
@@ -135,12 +135,16 @@ const Header: React.FC = () => {
               Contact
             </Link>
             <div className="flex items-center space-x-4 pt-2">
-              <button className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-900 text-white hover:bg-accent-500 transition-all duration-300">
-                <Search size={18} />
+              <button className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300">
+                <Search size={20} />
               </button>
-              <button className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-900 text-white hover:bg-accent-500 transition-all duration-300">
-                <User size={18} />
-              </button>
+              <Link
+                to="/profile"
+                className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <User size={20} />
+              </Link>
             </div>
           </div>
         </div>
