@@ -1,46 +1,40 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Layout from './components/layout/Layout';
+// src/App.tsx
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './components/auth/AuthContext';
+import { CartProvider } from './components/checkout/CartContext';
 import Home from './pages/Home';
-import About from './pages/About';
-import Cart from './pages/Cart';
-import Contact from './pages/Contact';
-import Checkout from './pages/Checkout';
 import Products from './pages/Products';
 import ProductDetails from './pages/ProductDetails';
-import FAQ from './pages/FAQ';
-import ShippingReturns from './pages/ShippingReturns';
-import PrivacyPolicy from './pages/PrivacyPolicy';
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
+import Login from './pages/auth/Login';
+import Signup from './pages/auth/Signup';
 import Profile from './pages/Profile';
-import Terms from './pages/Terms';
-import Blog from './pages/Blog';
+import AdminDashboard from './pages/AdminDashboard';
 import NotFound from './pages/NotFound';
-import { CartProvider } from './contexts/CartContext';
 
-function App() {
+const App = () => {
   return (
-    <CartProvider>
-      <Router>
-        <Layout>
+    <BrowserRouter>
+      <AuthProvider>
+        <CartProvider>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<Products />} />
-            <Route path="/about" element={<About />} />
-             <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/contact" element={<Contact />} />
             <Route path="/products/:id" element={<ProductDetails />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/shipping" element={<ShippingReturns />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/blog" element={<Blog />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </Layout>
-      </Router>
-    </CartProvider>
+        </CartProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;
