@@ -80,7 +80,13 @@ const Profile: React.FC = () => {
                   return (
                     <button
                       key={item.id}
-                      onClick={() => setActiveTab(item.id)}
+                      onClick={() => {
+                        if (item.id === 'orders') {
+                          navigate('/orders');
+                        } else {
+                          setActiveTab(item.id);
+                        }
+                      }}
                       className={`w-full flex items-center px-4 py-2 rounded-md text-left transition-colors ${
                         activeTab === item.id
                           ? 'bg-primary-600 text-white'

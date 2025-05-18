@@ -4,6 +4,7 @@ import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
 import { useCart } from '@/contexts/CartContext';
 import { CreditCard, Lock, Shield, Truck } from 'lucide-react';
+import SuccessModal from '@/components/checkout/SuccessModel';
 
 interface CheckoutForm {
   email: string;
@@ -34,13 +35,17 @@ const Checkout: React.FC = () => {
     cvv: '',
   });
 
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const { clearCart } = useCart();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 2000));
     setLoading(false);
-    // Handle successful payment
+    setIsSuccessModalOpen(true);
+    clearCart();
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -359,6 +364,7 @@ const Checkout: React.FC = () => {
           </div>
         </motion.div>
       </Container>
+      <SuccessModal isOpen={isSuccessModalOpen} onClose={() => setIsSuccessModalOpen(false)} />
     </div>
   );
 };

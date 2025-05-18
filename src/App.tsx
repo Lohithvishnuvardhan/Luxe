@@ -14,6 +14,7 @@ import Profile from './pages/Profile';
 import Terms from './pages/Terms';
 import Blog from './pages/Blog';
 import NotFound from './pages/NotFound';
+import Orders from './pages/Orders';
 import { CartProvider } from './contexts/CartContext';
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/orders" element={<Orders />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>

@@ -19,6 +19,18 @@ const CartSummary: React.FC = () => {
   };
 
   const handleCompletePurchase = () => {
+    // Save the order
+    const newOrder = {
+      id: `ORD-${Math.random().toString(36).substr(2, 9)}`,
+      date: new Date().toISOString(),
+      items: items,
+      total: totalPrice,
+      status: 'processing'
+    };
+    
+    const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+    localStorage.setItem('orders', JSON.stringify([...existingOrders, newOrder]));
+    
     setIsSuccessModalOpen(true);
     clearCart();
   };
