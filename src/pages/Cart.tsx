@@ -128,7 +128,13 @@ const Cart: React.FC = () => {
                     <span className="text-lg font-bold">${totalPrice.toFixed(2)}</span>
                   </div>
                 </div>
-                <Button variant="primary" size="lg" className="w-full mb-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="w-full mb-4"
+                  as={Link}
+                  to="/checkout"
+                >
                   Proceed to Checkout
                 </Button>
                 <Link

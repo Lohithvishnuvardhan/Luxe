@@ -14,19 +14,24 @@ import Profile from './pages/Profile';
 import Terms from './pages/Terms';
 import Blog from './pages/Blog';
 import NotFound from './pages/NotFound';
-import Orders from './pages/Orders';
 import { CartProvider } from './contexts/CartContext';
+
+import { AuthProvider } from './contexts/AuthContext';
+import BusinessDetails from './pages/BusinessDetails';
+import Orders from './pages/Orders';
+import Wishlist from './pages/Wishlist';
 
 function App() {
   return (
-    <CartProvider>
+    <AuthProvider>
+      <CartProvider>
       <Router>
         <Layout>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/products" element={<Products />} />
             <Route path="/about" element={<About />} />
-             <Route path="/cart" element={<Cart />} />
+            <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/products/:id" element={<ProductDetails />} />
@@ -34,14 +39,17 @@ function App() {
             <Route path="/shipping" element={<ShippingReturns />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/business-details" element={<BusinessDetails />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/blog" element={<Blog />} />
-            <Route path="/orders" element={<Orders />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
       </Router>
     </CartProvider>
+    </AuthProvider>
   );
 }
 

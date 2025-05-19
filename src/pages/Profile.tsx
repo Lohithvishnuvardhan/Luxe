@@ -6,13 +6,13 @@ import {
   User, 
   Package, 
   Heart, 
-  CreditCard, 
   MapPin, 
-  Bell, 
   Settings,
   LogOut
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { auth } from '@/config/firebase';
+import { signOut } from 'firebase/auth';
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
@@ -31,9 +31,14 @@ const Profile: React.FC = () => {
   });
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+  try {
+    await signOut(auth);
     navigate('/');
-  };
+  } catch (error) {
+    console.error('Error signing out:', error);
+  }
+};
+
 
   const handleSave = () => {
     setIsEditing(false);
@@ -42,11 +47,9 @@ const Profile: React.FC = () => {
 
   const menuItems = [
     { id: 'profile', label: 'Profile', icon: User },
-    { id: 'orders', label: 'Orders', icon: Package },
+    { id: 'orders', label: 'Orders', icon: Package, path: '/orders' },
     { id: 'wishlist', label: 'Wishlist', icon: Heart },
-    { id: 'payments', label: 'Payment Methods', icon: CreditCard },
     { id: 'addresses', label: 'Addresses', icon: MapPin },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'settings', label: 'Settings', icon: Settings }
   ];
 
@@ -81,10 +84,11 @@ const Profile: React.FC = () => {
                     <button
                       key={item.id}
                       onClick={() => {
-                        if (item.id === 'orders') {
-                          navigate('/orders');
+                        if (item.path) {
+                          navigate(item.path);
                         } else {
                           setActiveTab(item.id);
+                          navigate(`/${item.id}`);
                         }
                       }}
                       className={`w-full flex items-center px-4 py-2 rounded-md text-left transition-colors ${
