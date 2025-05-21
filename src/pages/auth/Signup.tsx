@@ -17,11 +17,23 @@ const SignUp: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    
+    if (!email || !password || !name) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
     try {
       await signup(email, password, name);
       navigate('/profile');
-    } catch (error) {
-      setError('Failed to create account');
+    } catch (error: any) {
+      setError(error.message || 'Failed to create account');
     }
   };
 

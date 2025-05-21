@@ -38,11 +38,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user: { email: string; }) => {
-      setUser(user);
-      if (user?.email) {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser?.email) {
         // Check if user is admin - you can store admin emails in Firebase or use custom claims
-        setIsAdmin(user.email.endsWith('@admin.com')); // Simple example - replace with your logic
+        setIsAdmin(currentUser.email.endsWith('@admin.com')); // Simple example - replace with your logic
       }
       setLoading(false);
     });

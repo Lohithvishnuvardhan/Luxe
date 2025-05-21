@@ -1,39 +1,62 @@
-import {
-getFirestore,
-collection,
-getDocs,
-deleteDoc,
-doc,
-} from 'firebase/firestore';
-import { app } from '../config/firebase'; // adjust path if your firebase config is elsewhere
 
-const db = getFirestore(app);
+import {
+  collection,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  doc,
+  updateDoc,
+  getDoc,
+} from 'firebase/firestore';
+import { db } from '../config/firebase';
 
 // Interface for product data
 export interface Product {
-id: string;
-name: string;
-price: number;
-image: string;
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  description?: string;
+  category?: string;
 }
 
-// Fetch all products from Firestore
+// Get all products
 export const getAllProducts = async (): Promise<Product[]> => {
-const querySnapshot = await getDocs(collection(db, 'products'));
-const products: Product[] = [];
-querySnapshot.forEach((docSnap) => {
-const data = docSnap.data();
-products.push({
-id: docSnap.id,
-name: data.name,
-price: data.price,
-image: data.image,
-});
-});
-return products;
+  const querySnapshot = await getDocs(collection(db, 'products'));
+  return querySnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  } as Product));
 };
 
-// Delete a product by ID
-export const deleteProduct = async (productId: string): Promise<void> => {
-await deleteDoc(doc(db, 'products', productId));
+// Add a new product
+export const addProduct = async (product: Omit<Product, 'id'>): Promise<string> => {
+  const docRef = await addDoc(collection(db, 'products'), product);
+  return docRef.id;
+};
+
+// Update a product
+export const updateProduct = async (id: string, product: Partial<Product>): Promise<void> => {
+  const productRef = doc(db, 'products', id);
+  await updateDoc(productRef, product);
+};
+
+// Get a single product
+export const getProduct = async (id: string): Promise<Product | null> => {
+  const productRef = doc(db, 'products', id);
+  const productSnap = await getDoc(productRef);
+  
+  if (!productSnap.exists()) {
+    return null;
+  }
+  
+  return {
+    id: productSnap.id,
+    ...productSnap.data()
+  } as Product;
+};
+
+// Delete a product
+export const deleteProduct = async (id: string): Promise<void> => {
+  await deleteDoc(doc(db, 'products', id));
 };
