@@ -20,7 +20,7 @@ interface CheckoutForm {
 }
 
 const Checkout: React.FC = () => {
-  const { items, totalPrice } = useCart();
+  const { items, totalPrice, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<CheckoutForm>({
     email: '',
@@ -36,11 +36,33 @@ const Checkout: React.FC = () => {
   });
 
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const { clearCart } = useCart();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    // Create new order with timestamp
+    const newOrder = {
+      id: `ORD-${Math.random().toString(36).substr(2, 9)}`,
+      date: new Date().toISOString(),
+      items: items.map(item => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        currency: item.currency,
+        imageUrl: item.imageUrl
+      })),
+      total: totalPrice,
+      status: 'processing'
+    };
+
+    // Get existing orders or initialize empty array
+    const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+    
+    // Add new order to beginning of array
+    localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
+
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 2000));
     setLoading(false);

@@ -1,21 +1,15 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
 import { ShoppingCart, Trash2 } from 'lucide-react';
+import { useWishlist } from '@/contexts/WishlistContext';
+import { useCart } from '@/contexts/CartContext';
+import { Link } from 'react-router-dom';
 
 const Wishlist: React.FC = () => {
-  // This would typically come from your state management
-  const wishlistItems = [
-    {
-      id: 1,
-      name: "Premium Business Suite",
-      price: 999.99,
-      image: "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg"
-    },
-    // Add more items as needed
-  ];
+  const { items, removeItem } = useWishlist();
+  const { addItem } = useCart();
 
   return (
     <div className="py-24">
@@ -28,34 +22,50 @@ const Wishlist: React.FC = () => {
           <h1 className="text-3xl font-serif font-bold mb-8">My Wishlist</h1>
           
           <div className="space-y-6">
-            {wishlistItems.map((item) => (
+            {items.map((item) => (
               <div key={item.id} className="bg-white rounded-lg shadow-subtle p-6 flex items-center gap-6">
-                <div className="w-24 h-24 rounded-lg overflow-hidden">
+                <Link to={`/products/${item.id}`} className="w-24 h-24 rounded-lg overflow-hidden">
                   <img 
-                    src={item.image} 
+                    src={item.imageUrl} 
                     alt={item.name}
                     className="w-full h-full object-cover"
                   />
-                </div>
+                </Link>
                 <div className="flex-1">
-                  <h3 className="text-xl font-medium mb-2">{item.name}</h3>
-                  <p className="text-primary-600 font-medium">${item.price}</p>
+                  <Link to={`/products/${item.id}`}>
+                    <h3 className="text-xl font-medium mb-2">{item.name}</h3>
+                  </Link>
+                  <p className="text-primary-600 font-medium">{item.currency}{item.price}</p>
                 </div>
                 <div className="flex gap-4">
-                  <Button variant="primary">
+                  <Button 
+                    variant="primary"
+                    onClick={() => addItem(item)}
+                  >
                     <ShoppingCart size={20} className="mr-2" />
                     Add to Cart
                   </Button>
-                  <Button variant="outline" className="text-red-500 hover:bg-red-50">
+                  <Button 
+                    variant="outline" 
+                    className="text-red-500 hover:bg-red-50"
+                    onClick={() => removeItem(item.id)}
+                  >
                     <Trash2 size={20} />
                   </Button>
                 </div>
               </div>
             ))}
             
-            {wishlistItems.length === 0 && (
+            {items.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-gray-600">Your wishlist is empty</p>
+                <p className="text-gray-600 mb-4">Your wishlist is empty</p>
+                <Button
+                  as={Link}
+                  to="/products"
+                  variant="primary"
+                >
+                  Browse Products
+                </Button>
               </div>
             )}
           </div>

@@ -19,17 +19,27 @@ const CartSummary: React.FC = () => {
   };
 
   const handleCompletePurchase = () => {
-    // Save the order
+    // Create a new order with current timestamp
     const newOrder = {
       id: `ORD-${Math.random().toString(36).substr(2, 9)}`,
       date: new Date().toISOString(),
-      items: items,
+      items: items.map(item => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        currency: item.currency,
+        imageUrl: item.imageUrl
+      })),
       total: totalPrice,
       status: 'processing'
     };
     
+    // Get existing orders or initialize empty array
     const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-    localStorage.setItem('orders', JSON.stringify([...existingOrders, newOrder]));
+    
+    // Add new order to beginning of array
+    localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
     
     setIsSuccessModalOpen(true);
     clearCart();
@@ -69,7 +79,6 @@ const CartSummary: React.FC = () => {
                 <button
                   onClick={() => removeItem(item.id)}
                   className="text-sm text-red-600 hover:text-red-700"
-                  disabled={item.quantity <= 1}
                 >
                   Remove
                 </button>

@@ -1,29 +1,27 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Container from '@/components/ui/Container';
 import { Package, Clock } from 'lucide-react';
 
+interface OrderItem {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+  currency: string;
+  imageUrl: string;
+}
+
 interface Order {
   id: string;
   date: string;
-  items: Array<{
-    id: string;
-    name: string;
-    quantity: number;
-    price: number;
-    currency: string;
-    imageUrl: string;
-  }>;
+  items: OrderItem[];
   total: number;
   status: 'processing' | 'shipped' | 'delivered';
 }
 
 const Orders: React.FC = () => {
-  const [orders, setOrders] = useState<Order[]>(() => {
-    const savedOrders = localStorage.getItem('orders');
-    return savedOrders ? JSON.parse(savedOrders) : [];
-  });
+  const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
     const savedOrders = localStorage.getItem('orders');
@@ -31,6 +29,18 @@ const Orders: React.FC = () => {
       setOrders(JSON.parse(savedOrders));
     }
   }, []);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    }).format(date);
+  };
 
   if (orders.length === 0) {
     return (
@@ -66,13 +76,7 @@ const Orders: React.FC = () => {
                     <h2 className="text-lg font-medium">Order #{order.id}</h2>
                     <div className="flex items-center text-gray-600 mt-1">
                       <Clock size={16} className="mr-1" />
-                      {new Date(order.date).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                      {formatDate(order.date)}
                     </div>
                   </div>
                   <div className="flex items-center">
@@ -97,7 +101,7 @@ const Orders: React.FC = () => {
                       </div>
                       <div className="text-right">
                         <p className="font-medium">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          {item.currency}{(item.price * item.quantity).toFixed(2)}
                         </p>
                       </div>
                     </div>

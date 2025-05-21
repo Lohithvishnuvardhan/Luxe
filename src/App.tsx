@@ -15,6 +15,7 @@ import Terms from './pages/Terms';
 import Blog from './pages/Blog';
 import NotFound from './pages/NotFound';
 import { CartProvider } from './contexts/CartContext';
+import { WishlistProvider } from './contexts/WishlistContext';
 
 import { AuthProvider } from './contexts/AuthContext';
 import BusinessDetails from './pages/BusinessDetails';
@@ -29,37 +30,39 @@ import Signup from './pages/auth/Signup';
 function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/auth/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
+      <WishlistProvider>
+        <CartProvider>
+          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/auth/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
 
-              {/* Protected Routes */}
-              <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
-              <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
-              <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
-              <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-              <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
-              <Route path="/products/:id" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />
-              <Route path="/faq" element={<ProtectedRoute><FAQ /></ProtectedRoute>} />
-              <Route path="/shipping" element={<ProtectedRoute><ShippingReturns /></ProtectedRoute>} />
-              <Route path="/privacy" element={<ProtectedRoute><PrivacyPolicy /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-              <Route path="/business-details" element={<ProtectedRoute><BusinessDetails /></ProtectedRoute>} />
-              <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-              <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
-              <Route path="/terms" element={<ProtectedRoute><Terms /></ProtectedRoute>} />
-              <Route path="/blog" element={<ProtectedRoute><Blog /></ProtectedRoute>} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Layout>
-        </Router>
-      </CartProvider>
+                {/* Protected Routes */}
+                <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
+                <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
+                <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+                <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+                <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
+                <Route path="/products/:id" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />
+                <Route path="/faq" element={<ProtectedRoute><FAQ /></ProtectedRoute>} />
+                <Route path="/shipping" element={<ProtectedRoute><ShippingReturns /></ProtectedRoute>} />
+                <Route path="/privacy" element={<ProtectedRoute><PrivacyPolicy /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="/business-details" element={<ProtectedRoute><BusinessDetails /></ProtectedRoute>} />
+                <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+                <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+                <Route path="/terms" element={<ProtectedRoute><Terms /></ProtectedRoute>} />
+                <Route path="/blog" element={<ProtectedRoute><Blog /></ProtectedRoute>} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Layout>
+          </Router>
+        </CartProvider>
+      </WishlistProvider>
     </AuthProvider>
   );
 }
