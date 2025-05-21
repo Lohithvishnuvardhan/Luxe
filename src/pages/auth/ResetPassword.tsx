@@ -1,10 +1,12 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Lock, KeyRound } from 'lucide-react';
 import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
-import { supabase } from '@/lib/supabase';
+import { auth } from '@/config/firebase';
+import { confirmPasswordReset } from 'firebase/auth';
 
 const ResetPassword: React.FC = () => {
   const navigate = useNavigate();
@@ -25,12 +27,15 @@ const ResetPassword: React.FC = () => {
     }
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: password,
-      });
+      // Get the action code from the URL
+      const searchParams = new URLSearchParams(window.location.search);
+      const oobCode = searchParams.get('oobCode');
 
-      if (error) throw error;
+      if (!oobCode) {
+        throw new Error('No reset code found in URL');
+      }
 
+      await confirmPasswordReset(auth, oobCode, password);
       navigate('/auth/login');
     } catch (err: any) {
       setError(err.message);

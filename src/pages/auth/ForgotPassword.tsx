@@ -1,16 +1,18 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, KeyRound } from 'lucide-react';
 import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
-import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 
 const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const { resetPassword } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,12 +21,7 @@ const ForgotPassword: React.FC = () => {
     setSuccess(false);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
-      });
-
-      if (error) throw error;
-
+      await resetPassword(email);
       setSuccess(true);
     } catch (err: any) {
       setError(err.message);
