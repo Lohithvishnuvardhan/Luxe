@@ -190,17 +190,19 @@ const Products: React.FC = () => {
 
                   <div className="absolute bottom-4 right-4 flex flex-col gap-2" style={{ transform: 'translateZ(40px)' }}>
                     <button 
-                      className="bg-white text-gray-900 p-2 rounded-full hover:bg-primary-600 hover:text-white transition-colors"
+                      className="bg-white text-gray-900 px-4 py-2 rounded-full hover:bg-primary-600 hover:text-white transition-colors flex items-center gap-2 min-w-[130px]"
                       aria-label="Add to wishlist"
                     >
                       <Heart size={18} />
+                      <span>Wishlist</span>
                     </button>
                     <Link 
                       to={`/products/${product.id}`}
-                      className="bg-white text-gray-900 p-2 rounded-full hover:bg-primary-600 hover:text-white transition-colors"
+                      className="bg-white text-gray-900 px-4 py-2 rounded-full hover:bg-primary-600 hover:text-white transition-colors flex items-center gap-2 min-w-[130px]"
                       aria-label="Quick view"
                     >
                       <Eye size={18} />
+                      <span>Quick View</span>
                     </Link>
                   </div>
                 </div>

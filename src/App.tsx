@@ -1,3 +1,5 @@
+// App.tsx
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
@@ -15,9 +17,9 @@ import Terms from './pages/Terms';
 import Blog from './pages/Blog';
 import NotFound from './pages/NotFound';
 import { CartProvider } from './contexts/CartContext';
-import { WishlistProvider } from './contexts/WishlistContext';
-
 import { AuthProvider } from './contexts/AuthContext';
+import { WishlistProvider } from './contexts/WishlistContext'; // ✅ ADDED
+
 import BusinessDetails from './pages/BusinessDetails';
 import Orders from './pages/Orders';
 import Wishlist from './pages/Wishlist';
@@ -26,12 +28,13 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import Login from './pages/auth/Login';
 import ResetPassword from './pages/auth/ResetPassword';
 import Signup from './pages/auth/Signup';
+import Admin from './pages/Admin';
 
 function App() {
   return (
     <AuthProvider>
-      <WishlistProvider>
-        <CartProvider>
+      <CartProvider>
+        <WishlistProvider> {/* ✅ WRAP HERE */}
           <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <Layout>
               <Routes>
@@ -57,12 +60,16 @@ function App() {
                 <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
                 <Route path="/terms" element={<ProtectedRoute><Terms /></ProtectedRoute>} />
                 <Route path="/blog" element={<ProtectedRoute><Blog /></ProtectedRoute>} />
+
+                {/* Admin Route */}
+                <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Layout>
           </Router>
-        </CartProvider>
-      </WishlistProvider>
+        </WishlistProvider>
+      </CartProvider>
     </AuthProvider>
   );
 }

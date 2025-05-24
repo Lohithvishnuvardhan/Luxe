@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { 
   createUserWithEmailAndPassword,
@@ -11,7 +10,8 @@ import {
   updateProfile,
   User
 } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { auth, db } from '../config/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 interface AuthContextType {
   user: User | null;
@@ -37,12 +37,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  const checkAdminStatus = async (user: User) => {
+    try {
+      const adminRef = doc(db, 'admins', user.uid);
+      const adminDoc = await getDoc(adminRef);
+      return adminDoc.exists();
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      return false;
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
-      if (currentUser?.email) {
-        // Check if user is admin - you can store admin emails in Firebase or use custom claims
-        setIsAdmin(currentUser.email.endsWith('@admin.com')); // Simple example - replace with your logic
+      if (currentUser) {
+        const adminStatus = await checkAdminStatus(currentUser);
+        setIsAdmin(adminStatus);
+      } else {
+        setIsAdmin(false);
       }
       setLoading(false);
     });
@@ -55,16 +68,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const login = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    const { user } = await signInWithEmailAndPassword(auth, email, password);
+    const adminStatus = await checkAdminStatus(user);
+    setIsAdmin(adminStatus);
   };
 
   const logout = async () => {
     await signOut(auth);
+    setIsAdmin(false);
   };
 
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    const { user } = await signInWithPopup(auth, provider);
+    const adminStatus = await checkAdminStatus(user);
+    setIsAdmin(adminStatus);
   };
 
   const resetPassword = async (email: string) => {

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,14 +9,19 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, signInWithGoogle } = useAuth();
+  const { login, signInWithGoogle, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await login(email, password);
-      navigate('/profile');
+      // Redirect based on user role
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/profile');
+      }
     } catch (error) {
       setError('Failed to login');
     }

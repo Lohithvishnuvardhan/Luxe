@@ -5,8 +5,6 @@ import {
   User, 
   Package, 
   Heart, 
-  MapPin, 
-  Settings,
   LogOut,
   Edit3,
   Camera,
@@ -121,8 +119,7 @@ const Profile: React.FC = () => {
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'orders', label: 'Orders', icon: Package, path: '/orders' },
     { id: 'wishlist', label: 'Wishlist', icon: Heart, path: '/wishlist' },
-    { id: 'addresses', label: 'Addresses', icon: MapPin },
-    { id: 'settings', label: 'Settings', icon: Settings }
+
   ];
 
   return (
@@ -236,6 +233,7 @@ const Profile: React.FC = () => {
                       variant="outline"
                       onClick={() => setIsEditing(true)}
                       leftIcon={<Edit3 size={18} />}
+                      className="!inline-flex !items-center !text-primary-600 !border-primary-600 !hover:bg-primary-50"
                     >
                       Edit Profile
                     </Button>

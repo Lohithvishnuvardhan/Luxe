@@ -1,9 +1,13 @@
-
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
-export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  requireAdmin?: boolean;
+}
+
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
+  const { user, loading, isAdmin } = useAuth();
 
   if (loading) {
     return <div>Loading...</div>;
@@ -11,6 +15,10 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (!user) {
     return <Navigate to="/auth/login" />;
+  }
+
+  if (requireAdmin && !isAdmin) {
+    return <Navigate to="/" />;
   }
 
   return <>{children}</>;
