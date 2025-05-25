@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import Container from '@/components/ui/Container';
 import { Users, Package, ShoppingBag } from 'lucide-react';
 

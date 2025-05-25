@@ -11,7 +11,7 @@ import {
   User
 } from 'firebase/auth';
 import { auth, db } from '../config/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 interface AuthContextType {
   user: User | null;
@@ -39,9 +39,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkAdminStatus = async (user: User) => {
     try {
-      const adminRef = doc(db, 'admins', user.uid);
-      const adminDoc = await getDoc(adminRef);
-      return adminDoc.exists();
+      const userRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userRef);
+      
+      if (!userDoc.exists()) {
+        // Create user document if it doesn't exist
+        await setDoc(userRef, {
+          email: user.email,
+          name: user.displayName,
+          role: 'user',
+          createdAt: new Date().toISOString()
+        });
+        return false;
+      }
+      
+      return userDoc.data()?.role === 'admin';
     } catch (error) {
       console.error('Error checking admin status:', error);
       return false;
@@ -50,13 +62,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
       if (currentUser) {
         const adminStatus = await checkAdminStatus(currentUser);
         setIsAdmin(adminStatus);
       } else {
         setIsAdmin(false);
       }
+      setUser(currentUser);
       setLoading(false);
     });
     return unsubscribe;
@@ -65,6 +77,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (email: string, password: string, name: string) => {
     const { user } = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(user, { displayName: name });
+    
+    // Create user document
+    await setDoc(doc(db, 'users', user.uid), {
+      email: user.email,
+      name: name,
+      role: 'user',
+      createdAt: new Date().toISOString()
+    });
   };
 
   const login = async (email: string, password: string) => {

@@ -60,3 +60,8 @@ export const getProduct = async (id: string): Promise<Product | null> => {
 export const deleteProduct = async (id: string): Promise<void> => {
   await deleteDoc(doc(db, 'products', id));
 };
+
+export {
+  // Interface for product data
+  db
+};

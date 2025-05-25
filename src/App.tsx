@@ -18,7 +18,7 @@ import Blog from './pages/Blog';
 import NotFound from './pages/NotFound';
 import { CartProvider } from './contexts/CartContext';
 import { AuthProvider } from './contexts/AuthContext';
-import { WishlistProvider } from './contexts/WishlistContext'; // ✅ ADDED
+import { WishlistProvider } from './contexts/WishlistContext';
 
 import BusinessDetails from './pages/BusinessDetails';
 import Orders from './pages/Orders';
@@ -30,11 +30,13 @@ import ResetPassword from './pages/auth/ResetPassword';
 import Signup from './pages/auth/Signup';
 import Admin from './pages/Admin';
 
+import { AdminRoute } from './routes/AdminRoute'; // ✅ Admin route import
+
 function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <WishlistProvider> {/* ✅ WRAP HERE */}
+        <WishlistProvider>
           <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <Layout>
               <Routes>
@@ -61,8 +63,8 @@ function App() {
                 <Route path="/terms" element={<ProtectedRoute><Terms /></ProtectedRoute>} />
                 <Route path="/blog" element={<ProtectedRoute><Blog /></ProtectedRoute>} />
 
-                {/* Admin Route */}
-                <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+                {/* ✅ Admin-only Route */}
+                <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

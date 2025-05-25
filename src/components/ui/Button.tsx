@@ -29,7 +29,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const variants = {
-      primary: 'bg-gradient-to-r from-accent-500 to-secondary-500 text-gray-900 hover:from-accent-600 hover:to-secondary-600 active:from-accent-700 active:to-secondary-700 shadow-lg hover:shadow-xl transition-all duration-300',
+      primary: 'bg-gradient-to-r from-secondary-500 via-accent-500 to-secondary-500 bg-[length:200%_auto] text-white hover:bg-[length:100%_auto] active:scale-95 shadow-lg hover:shadow-xl transition-all duration-300',
       secondary: 'bg-white text-gray-900 border-2 border-accent-500 hover:bg-accent-50 active:bg-accent-100 shadow-md hover:shadow-lg transition-all duration-300',
       outline: 'border-2 border-white bg-transparent backdrop-blur-sm text-white hover:bg-white/10 active:bg-white/20 shadow-md hover:shadow-lg transition-all duration-300',
       ghost: 'text-gray-900 hover:bg-accent-50 active:bg-accent-100 transition-all duration-300',

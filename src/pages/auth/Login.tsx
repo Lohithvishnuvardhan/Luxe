@@ -9,21 +9,34 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login, signInWithGoogle, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setError('');
+      setLoading(true);
       await login(email, password);
-      // Redirect based on user role
-      if (isAdmin) {
-        navigate('/admin');
-      } else {
-        navigate('/profile');
-      }
-    } catch (error) {
-      setError('Failed to login');
+      navigate(isAdmin ? '/admin' : '/profile');
+    } catch (error: any) {
+      setError('Failed to login: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setError('');
+      setLoading(true);
+      await signInWithGoogle();
+      navigate(isAdmin ? '/admin' : '/profile');
+    } catch (error: any) {
+      setError('Failed to sign in with Google: ' + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,7 +70,7 @@ const Login: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  className="premium-input"
                   required
                 />
               </div>
@@ -69,12 +82,17 @@ const Login: React.FC = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  className="premium-input"
                   required
                 />
               </div>
               
-              <Button type="submit" variant="primary" className="w-full py-3">
+              <Button 
+                type="submit" 
+                variant="primary" 
+                className="w-full py-3"
+                isLoading={loading}
+              >
                 Sign In
               </Button>
             </form>
@@ -89,23 +107,24 @@ const Login: React.FC = () => {
             </div>
 
             <Button
-              onClick={signInWithGoogle}
+              onClick={handleGoogleSignIn}
               variant="outline"
               className="w-full py-3 flex items-center justify-center gap-2"
+              isLoading={loading}
             >
               <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
               Sign in with Google
             </Button>
 
             <div className="mt-6 text-center text-sm">
-              <Link to="/forgot-password" className="text-primary-600 hover:text-primary-700 font-medium">
+              <Link to="/forgot-password" className="premium-link">
                 Forgot Password?
               </Link>
             </div>
             
             <div className="mt-4 text-center text-sm">
               Don't have an account?{' '}
-              <Link to="/signup" className="text-primary-600 hover:text-primary-700 font-medium">
+              <Link to="/signup" className="premium-link">
                 Create Account
               </Link>
             </div>
