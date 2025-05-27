@@ -10,7 +10,7 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, signInWithGoogle, isAdmin } = useAuth();
+  const { login, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,18 +27,6 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      setError('');
-      setLoading(true);
-      await signInWithGoogle();
-      navigate(isAdmin ? '/admin' : '/profile');
-    } catch (error: any) {
-      setError('Failed to sign in with Google: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-24">
@@ -102,19 +90,11 @@ const Login: React.FC = () => {
                 <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                <span className="px-2 bg-white text-gray-500"></span>
               </div>
             </div>
 
-            <Button
-              onClick={handleGoogleSignIn}
-              variant="outline"
-              className="w-full py-3 flex items-center justify-center gap-2"
-              isLoading={loading}
-            >
-              <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
-              Sign in with Google
-            </Button>
+          
 
             <div className="mt-6 text-center text-sm">
               <Link to="/forgot-password" className="premium-link">

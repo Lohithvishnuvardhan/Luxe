@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Menu, X, Search, User } from 'lucide-react';
+import { ShoppingCart, Menu, X, Search, User, Settings } from 'lucide-react';
 import Container from '../ui/Container';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { items } = useCart();
+  const { isAdmin } = useAuth();
   
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
 
@@ -53,6 +55,11 @@ const Header: React.FC = () => {
             <Link to="/contact" className="font-medium text-gray-800 hover:text-accent-500 transition-colors">
               Contact
             </Link>
+            {isAdmin && (
+              <Link to="/admin" className="font-medium text-gray-800 hover:text-accent-500 transition-colors">
+                Dashboard
+              </Link>
+            )}
           </nav>
 
           {/* Desktop Actions */}
@@ -66,6 +73,14 @@ const Header: React.FC = () => {
             >
               <User size={20} />
             </Link>
+            {isAdmin && (
+              <Link 
+                to="/admin"
+                className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300 transform hover:scale-105"
+              >
+                <Settings size={20} />
+              </Link>
+            )}
             <Link 
               to="/cart" 
               className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300 transform hover:scale-105 relative"
@@ -134,6 +149,15 @@ const Header: React.FC = () => {
             >
               Contact
             </Link>
+            {isAdmin && (
+              <Link 
+                to="/admin" 
+                className="block font-medium text-gray-800 hover:text-accent-500 py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+            )}
             <div className="flex items-center space-x-4 pt-2">
               <button className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300">
                 <Search size={20} />
@@ -145,6 +169,15 @@ const Header: React.FC = () => {
               >
                 <User size={20} />
               </Link>
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Settings size={20} />
+                </Link>
+              )}
             </div>
           </div>
         </div>

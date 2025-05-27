@@ -15,7 +15,7 @@ import {
 import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db, auth } from '@/config/firebase';
 import { updateProfile } from 'firebase/auth';
 
@@ -58,19 +58,30 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     const fetchUserProfile = async () => {
-      if (user?.uid) {
-        try {
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
-          if (userDoc.exists()) {
-            setFormData(prev => ({
-              ...prev,
-              ...userDoc.data() as UserProfile
-            }));
-          }
-        } catch (err) {
-          console.error('Error fetching user profile:', err);
-          setError('Failed to load profile data');
+      if (!user?.uid) return;
+
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (userDoc.exists()) {
+          const data = userDoc.data() as UserProfile;
+          setFormData(prev => ({
+            ...prev,
+            ...data
+          }));
+        } else {
+          // Initialize user document with default data
+          const initialData = {
+            ...formData,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          await setDoc(userDocRef, initialData);
         }
+      } catch (err) {
+        console.error('Error fetching user profile:', err);
+        setError('Failed to load profile data. Please try again later.');
       }
     };
 
@@ -83,33 +94,41 @@ const Profile: React.FC = () => {
       navigate('/auth/login');
     } catch (error) {
       console.error('Error signing out:', error);
+      setError('Failed to sign out. Please try again.');
     }
   };
 
   const handleSave = async () => {
+    if (!user?.uid) {
+      setError('No user found. Please log in again.');
+      return;
+    }
+
     setLoading(true);
     setError('');
     setSuccess('');
 
     try {
-      if (!user?.uid) throw new Error('No user found');
-
-      // Update Firestore
-      await updateDoc(doc(db, 'users', user.uid), {
+      const userDocRef = doc(db, 'users', user.uid);
+      
+      // Update Firestore document
+      await setDoc(userDocRef, {
         ...formData,
         updatedAt: new Date().toISOString()
-      });
+      }, { merge: true });
 
       // Update Firebase Auth profile
-      await updateProfile(auth.currentUser!, {
-        displayName: `${formData.firstName} ${formData.lastName}`
-      });
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, {
+          displayName: `${formData.firstName} ${formData.lastName}`
+        });
+      }
 
       setSuccess('Profile updated successfully');
       setIsEditing(false);
     } catch (err) {
       console.error('Error updating profile:', err);
-      setError('Failed to update profile');
+      setError('Failed to update profile. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -119,9 +138,9 @@ const Profile: React.FC = () => {
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'orders', label: 'Orders', icon: Package, path: '/orders' },
     { id: 'wishlist', label: 'Wishlist', icon: Heart, path: '/wishlist' },
-
   ];
 
+  // Rest of the component remains exactly the same...
   return (
     <div className="py-24 bg-gray-50">
       <Container>
@@ -394,12 +413,7 @@ const Profile: React.FC = () => {
 
                   {isEditing && (
                     <div className="flex justify-end gap-4 mt-6">
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsEditing(false)}
-                      >
-                        Cancel
-                      </Button>
+                    
                       <Button
                         variant="primary"
                         onClick={handleSave}

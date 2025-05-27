@@ -3,12 +3,15 @@ import { motion } from 'framer-motion';
 import Container from '@/components/ui/Container';
 import { ShoppingCart, Heart, Eye, Search, Star } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 import { Link } from 'react-router-dom';
 import { ALL_PRODUCTS } from '@/data/products';
 import { CATEGORIES } from '@/data/categories';
+import { Product } from '@/types';
 
 const Products: React.FC = () => {
   const { addItem } = useCart();
+  const { addItem: addToWishlist, isInWishlist, removeItem: removeFromWishlist } = useWishlist();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('featured');
@@ -16,6 +19,14 @@ const Products: React.FC = () => {
   const [] = useState<{ [key: string]: boolean }>({});
   const rotationRefs = useRef<{ [key: string]: { x: number; y: number } }>({});
   const productRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  const handleWishlistToggle = (product: Product) => {
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
+    }
+  };
 
   const filteredProducts = ALL_PRODUCTS.filter(product => {
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
@@ -190,10 +201,15 @@ const Products: React.FC = () => {
 
                   <div className="absolute bottom-4 right-4 flex flex-col gap-2" style={{ transform: 'translateZ(40px)' }}>
                     <button 
-                      className="bg-white text-gray-900 px-4 py-2 rounded-full hover:bg-primary-600 hover:text-white transition-colors flex items-center gap-2 min-w-[130px]"
-                      aria-label="Add to wishlist"
+                      onClick={() => handleWishlistToggle(product)}
+                      className={`bg-white px-4 py-2 rounded-full transition-colors flex items-center gap-2 min-w-[130px] ${
+                        isInWishlist(product.id) 
+                          ? 'text-red-500 hover:bg-red-50' 
+                          : 'text-gray-900 hover:bg-primary-600 hover:text-white'
+                      }`}
+                      aria-label="Toggle wishlist"
                     >
-                      <Heart size={18} />
+                      <Heart size={18} fill={isInWishlist(product.id) ? "currentColor" : "none"} />
                       <span>Wishlist</span>
                     </button>
                     <Link 

@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
-import { useCart } from '@/contexts/CartContext';
+import { useNavigate } from 'react-router-dom';
 import { Shield, Truck, CreditCard } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/ui/Button';
 import SuccessModal from './SuccessModel';
+import { createOrder } from '@/lib/orders';
 
 const CartSummary: React.FC = () => {
   const { items, updateQuantity, removeItem, totalPrice, clearCart } = useCart();
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const handleQuantityChange = (productId: string, newQuantity: number) => {
     if (newQuantity < 1) {
@@ -18,31 +23,20 @@ const CartSummary: React.FC = () => {
     }
   };
 
-  const handleCompletePurchase = () => {
-    // Create a new order with current timestamp
-    const newOrder = {
-      id: `ORD-${Math.random().toString(36).substr(2, 9)}`,
-      date: new Date().toISOString(),
-      items: items.map(item => ({
-        id: item.id,
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-        currency: item.currency,
-        imageUrl: item.imageUrl
-      })),
-      total: totalPrice,
-      status: 'processing'
-    };
-    
-    // Get existing orders or initialize empty array
-    const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-    
-    // Add new order to beginning of array
-    localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
-    
-    setIsSuccessModalOpen(true);
-    clearCart();
+  const handleCompletePurchase = async () => {
+    if (!user) {
+      navigate('/auth/login');
+      return;
+    }
+
+    try {
+      await createOrder(user.uid, items, totalPrice);
+      setIsSuccessModalOpen(true);
+      clearCart();
+    } catch (error) {
+      console.error('Error creating order:', error);
+      // Handle error (show error message to user)
+    }
   };
 
   return (

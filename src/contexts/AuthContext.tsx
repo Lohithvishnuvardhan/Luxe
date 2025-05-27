@@ -41,19 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const userRef = doc(db, 'users', user.uid);
       const userDoc = await getDoc(userRef);
-      
-      if (!userDoc.exists()) {
-        // Create user document if it doesn't exist
-        await setDoc(userRef, {
-          email: user.email,
-          name: user.displayName,
-          role: 'user',
-          createdAt: new Date().toISOString()
-        });
-        return false;
-      }
-      
-      return userDoc.data()?.role === 'admin';
+      return userDoc.exists() && userDoc.data()?.role === 'admin';
     } catch (error) {
       console.error('Error checking admin status:', error);
       return false;
@@ -62,13 +50,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
       if (currentUser) {
         const adminStatus = await checkAdminStatus(currentUser);
         setIsAdmin(adminStatus);
       } else {
         setIsAdmin(false);
       }
-      setUser(currentUser);
       setLoading(false);
     });
     return unsubscribe;
@@ -80,8 +68,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Create user document
     await setDoc(doc(db, 'users', user.uid), {
-      email: user.email,
-      name: name,
+      name,
+      email,
       role: 'user',
       createdAt: new Date().toISOString()
     });

@@ -5,12 +5,14 @@ import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
 import { ShoppingCart, Heart } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 import { ALL_PRODUCTS } from '@/data/products';
 
 const ProductDetails: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addItem } = useCart();
+  const { addItem: addToWishlist, isInWishlist, removeItem: removeFromWishlist } = useWishlist();
   
   const product = ALL_PRODUCTS.find(p => p.id === id);
   
@@ -21,6 +23,14 @@ const ProductDetails: React.FC = () => {
   const handleBuyNow = () => {
     addItem(product);
     navigate('/checkout');
+  };
+
+  const handleWishlistToggle = () => {
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
+    }
   };
 
   return (
@@ -115,7 +125,9 @@ const ProductDetails: React.FC = () => {
               <Button
                 variant="outline"
                 size="lg"
-                leftIcon={<Heart size={20} />}
+                onClick={handleWishlistToggle}
+                className={isInWishlist(product.id) ? 'text-red-500 border-red-500 hover:bg-red-50' : ''}
+                leftIcon={<Heart size={20} fill={isInWishlist(product.id) ? "currentColor" : "none"} />}
               >
                 Wishlist
               </Button>
