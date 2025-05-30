@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import Container from '@/components/ui/Container';
 import { ShoppingCart, Heart, Eye, Search, Star } from 'lucide-react';
@@ -6,9 +6,6 @@ import { useCart } from '@/contexts/CartContext';
 import { Link } from 'react-router-dom';
 import { ALL_PRODUCTS } from '@/data/products';
 import { CATEGORIES } from '@/data/categories';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '@/config/firebase';
-import { Product } from '@/types';
 
 const Products: React.FC = () => {
   const { addItem } = useCart();
@@ -16,41 +13,16 @@ const Products: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('featured');
   const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
-  const [products, setProducts] = useState<Product[]>(ALL_PRODUCTS);
-  const [loading, setLoading] = useState(true);
   const rotationRefs = useRef<{ [key: string]: { x: number; y: number } }>({});
   const productRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'products'));
-        const firestoreProducts = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Product[];
-        
-        // Merge Firestore products with static products
-        // Filter out any static products that have the same ID as Firestore products
-        const staticProducts = ALL_PRODUCTS.filter(
-          staticProduct => !firestoreProducts.some(
-            firestoreProduct => firestoreProduct.id === staticProduct.id
-          )
-        );
-        
-        setProducts([...staticProducts, ...firestoreProducts]);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-        setProducts(ALL_PRODUCTS); // Fallback to static products if fetch fails
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Get products from localStorage or use default ALL_PRODUCTS
+  const [products] = useState(() => {
+    const savedProducts = localStorage.getItem('products');
+    return savedProducts ? JSON.parse(savedProducts) : ALL_PRODUCTS;
+  });
 
-    fetchProducts();
-  }, []);
-
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = products.filter((product: { category: string; name: string; description: string; price: number; }) => {
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          product.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -67,9 +39,9 @@ const Products: React.FC = () => {
       case 'name':
         return a.name.localeCompare(b.name);
       case 'rating':
-        return (b.rating || 0) - (a.rating || 0);
+        return b.rating - a.rating;
       default:
-        return (b.rating || 0) - (a.rating || 0);
+        return b.rating - a.rating;
     }
   });
 
@@ -110,19 +82,6 @@ const Products: React.FC = () => {
     rotationRefs.current[productId] = { x: 0, y: 0 };
   };
 
-  if (loading) {
-    return (
-      <div className="py-24 bg-gray-50">
-        <Container>
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading products...</p>
-          </div>
-        </Container>
-      </div>
-    );
-  }
-
   return (
     <div className="py-24 bg-gray-50">
       <Container>
@@ -140,8 +99,8 @@ const Products: React.FC = () => {
           </motion.div>
 
           <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="relative flex-1 min-w-[200px]">
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <input
                   type="text"
@@ -197,122 +156,116 @@ const Products: React.FC = () => {
             </div>
           </div>
 
-          {sortedProducts.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600 mb-4">No products found matching your criteria.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {sortedProducts.map((product) => (
-                <motion.div
-                  key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md"
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {sortedProducts.map((product) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md"
+              >
+                <div 
+                  className="relative h-[400px] transition-all duration-300"
+                  ref={(el) => productRefs.current[product.id] = el}
+                  onMouseMove={(e) => handleMouseMove(e, product.id)}
+                  onMouseLeave={() => handleMouseLeave(product.id)}
+                  style={{ transformStyle: 'preserve-3d' }}
                 >
-                  <div 
-                    className="relative h-[400px] transition-all duration-300"
-                    ref={(el) => productRefs.current[product.id] = el}
-                    onMouseMove={(e) => handleMouseMove(e, product.id)}
-                    onMouseLeave={() => handleMouseLeave(product.id)}
-                    style={{ transformStyle: 'preserve-3d' }}
-                  >
-                    <Link to={`/products/${product.id}`}>
-                      <img 
-                        src={product.imageUrl} 
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                        style={{ transform: 'translateZ(20px)' }}
-                      />
+                  <Link to={`/products/${product.id}`}>
+                    <img 
+                      src={product.imageUrl} 
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                      style={{ transform: 'translateZ(20px)' }}
+                    />
+                  </Link>
+
+                  {product.originalPrice && (
+                    <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded" style={{ transform: 'translateZ(40px)' }}>
+                      SALE
+                    </div>
+                  )}
+
+                  {product.new && (
+                    <div className="absolute top-4 right-4 bg-accent-500 text-white text-xs font-bold px-2 py-1 rounded" style={{ transform: 'translateZ(40px)' }}>
+                      NEW
+                    </div>
+                  )}
+
+                  <div className="absolute bottom-4 right-4 flex flex-col gap-2" style={{ transform: 'translateZ(40px)' }}>
+                    <button 
+                      className="bg-white text-gray-900 px-4 py-2 rounded-full hover:bg-primary-600 hover:text-white transition-colors flex items-center gap-2 min-w-[130px]"
+                      aria-label="Add to wishlist"
+                    >
+                      <Heart size={18} />
+                      <span>Wishlist</span>
+                    </button>
+                    <Link 
+                      to={`/products/${product.id}`}
+                      className="bg-white text-gray-900 px-4 py-2 rounded-full hover:bg-primary-600 hover:text-white transition-colors flex items-center gap-2 min-w-[130px]"
+                      aria-label="Quick view"
+                    >
+                      <Eye size={18} />
+                      <span>Quick View</span>
                     </Link>
+                  </div>
+                </div>
 
-                    {product.originalPrice && (
-                      <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded" style={{ transform: 'translateZ(40px)' }}>
-                        SALE
-                      </div>
-                    )}
-
-                    {product.new && (
-                      <div className="absolute top-4 right-4 bg-accent-500 text-white text-xs font-bold px-2 py-1 rounded" style={{ transform: 'translateZ(40px)' }}>
-                        NEW
-                      </div>
-                    )}
-
-                    <div className="absolute bottom-4 right-4 flex flex-col gap-2" style={{ transform: 'translateZ(40px)' }}>
-                      <button 
-                        className="bg-white text-gray-900 px-4 py-2 rounded-full hover:bg-primary-600 hover:text-white transition-colors flex items-center gap-2 min-w-[130px]"
-                        aria-label="Add to wishlist"
-                      >
-                        <Heart size={18} />
-                        <span>Wishlist</span>
-                      </button>
-                      <Link 
-                        to={`/products/${product.id}`}
-                        className="bg-white text-gray-900 px-4 py-2 rounded-full hover:bg-primary-600 hover:text-white transition-colors flex items-center gap-2 min-w-[130px]"
-                        aria-label="Quick view"
-                      >
-                        <Eye size={18} />
-                        <span>Quick View</span>
-                      </Link>
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-3">
+                    <Link to={`/products/${product.id}`}>
+                      <h3 className="text-xl font-medium text-gray-900 hover:text-primary-600 transition-colors">
+                        {product.name}
+                      </h3>
+                    </Link>
+                    <div className="flex items-center">
+                      <Star className="w-5 h-5 text-accent-500" />
+                      <span className="ml-1 text-sm text-gray-600">{product.rating}</span>
                     </div>
                   </div>
 
-                  <div className="p-6">
-                    <div className="flex justify-between items-start mb-3">
-                      <Link to={`/products/${product.id}`}>
-                        <h3 className="text-xl font-medium text-gray-900 hover:text-primary-600 transition-colors">
-                          {product.name}
-                        </h3>
-                      </Link>
-                      <div className="flex items-center">
-                        <Star className="w-5 h-5 text-accent-500" />
-                        <span className="ml-1 text-sm text-gray-600">{product.rating || 0}</span>
-                      </div>
-                    </div>
+                  <p className="text-gray-600 mb-4 line-clamp-2 text-lg">
+                    {product.description}
+                  </p>
 
-                    <p className="text-gray-600 mb-4 line-clamp-2 text-lg">
-                      {product.description}
-                    </p>
-
-                    <div className="flex justify-between items-center">
-                      <div>
-                        {product.originalPrice ? (
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl font-bold text-gray-900">
-                              {product.currency}{product.price}
-                            </span>
-                            <span className="text-lg text-gray-500 line-through">
-                              {product.currency}{product.originalPrice}
-                            </span>
-                          </div>
-                        ) : (
+                  <div className="flex justify-between items-center">
+                    <div>
+                      {product.originalPrice ? (
+                        <div className="flex items-center gap-2">
                           <span className="text-2xl font-bold text-gray-900">
                             {product.currency}{product.price}
                           </span>
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <button
-                          onClick={() => addItem(product)}
-                          className="text-base bg-primary-600 hover:bg-primary-700 text-white py-2 px-6 rounded-md transition-colors flex items-center justify-center gap-2"
-                        >
-                          <ShoppingCart size={18} />
-                          Cart
-                        </button>
-                        <Link
-                          to={`/products/${product.id}`}
-                          className="text-base bg-accent-500 hover:bg-accent-600 text-white py-3 px-6 rounded-md transition-colors text-center"
-                        >
-                          Buy Now
-                        </Link>
-                      </div>
+                          <span className="text-lg text-gray-500 line-through">
+                            {product.currency}{product.originalPrice}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-2xl font-bold text-gray-900">
+                          {product.currency}{product.price}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => addItem(product)}
+                        className="text-base bg-primary-600 hover:bg-primary-700 text-white py-2 px-6 rounded-md transition-colors flex items-center justify-center gap-2"
+                      >
+                        <ShoppingCart size={18} />
+                        Cart
+                      </button>
+                      <Link
+                        to={`/products/${product.id}`}
+                        className="text-base bg-accent-500 hover:bg-accent-600 text-white py-3 px-6 rounded-md transition-colors text-center"
+                      >
+                        Buy Now
+                      </Link>
                     </div>
                   </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </Container>
     </div>
