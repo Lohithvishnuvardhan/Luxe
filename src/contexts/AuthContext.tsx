@@ -11,7 +11,7 @@ import {
   User
 } from 'firebase/auth';
 import { auth, db } from '../config/firebase';
-import { doc, DocumentData, DocumentReference, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 interface AuthContextType {
   user: User | null;
@@ -20,8 +20,6 @@ interface AuthContextType {
   logout: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
-  makeAdmin: (userId: string) => Promise<void>;
-  removeAdmin: (userId: string) => Promise<void>;
   loading: boolean;
   isAdmin: boolean;
 }
@@ -50,40 +48,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // New function to make a user an admin
-  const makeAdmin = async (userId: string) => {
-    if (!user || !isAdmin) throw new Error('Unauthorized');
-    
-    try {
-      await setDoc(doc(db, 'admins', userId), {
-        addedBy: user.uid,
-        addedAt: new Date().toISOString()
-      });
-    } catch (error) {
-      console.error('Error making user admin:', error);
-      throw error;
-    }
-  };
-
-  // New function to remove admin status
-  const removeAdmin = async (userId: string) => {
-    if (!user || !isAdmin) throw new Error('Unauthorized');
-    
-    try {
-      const adminRef = doc(db, 'admins', userId);
-      await deleteDoc(adminRef);
-    } catch (error) {
-      console.error('Error removing admin status:', error);
-      throw error;
-    }
-  };
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
         const adminStatus = await checkAdminStatus(currentUser);
         setIsAdmin(adminStatus);
+        
+        // Create or update user document
+        const userRef = doc(db, 'users', currentUser.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (!userDoc.exists()) {
+          await setDoc(userRef, {
+            name: currentUser.displayName || 'Unknown User',
+            email: currentUser.email,
+            role: adminStatus ? 'admin' : 'customer',
+            status: 'active',
+            joinDate: new Date().toISOString(),
+            orders: 0
+          });
+        }
       } else {
         setIsAdmin(false);
       }
@@ -95,6 +80,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (email: string, password: string, name: string) => {
     const { user } = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(user, { displayName: name });
+    
+    // Create user document
+    await setDoc(doc(db, 'users', user.uid), {
+      name,
+      email,
+      role: 'customer',
+      status: 'active',
+      joinDate: new Date().toISOString(),
+      orders: 0
+    });
   };
 
   const login = async (email: string, password: string) => {
@@ -113,6 +108,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { user } = await signInWithPopup(auth, provider);
     const adminStatus = await checkAdminStatus(user);
     setIsAdmin(adminStatus);
+    
+    // Create or update user document
+    const userRef = doc(db, 'users', user.uid);
+    const userDoc = await getDoc(userRef);
+    
+    if (!userDoc.exists()) {
+      await setDoc(userRef, {
+        name: user.displayName || 'Unknown User',
+        email: user.email,
+        role: adminStatus ? 'admin' : 'customer',
+        status: 'active',
+        joinDate: new Date().toISOString(),
+        orders: 0
+      });
+    }
   };
 
   const resetPassword = async (email: string) => {
@@ -126,8 +136,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     signInWithGoogle,
     resetPassword,
-    makeAdmin,
-    removeAdmin,
     loading,
     isAdmin
   };
@@ -138,7 +146,3 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </AuthContext.Provider>
   );
 };
-
-function deleteDoc(_adminRef: DocumentReference<DocumentData, DocumentData>) {
-  throw new Error('Function not implemented.');
-}
