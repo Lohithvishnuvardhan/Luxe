@@ -4,7 +4,7 @@ import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
 import { Plus, Edit2, Trash2, X } from 'lucide-react';
 import { ALL_PRODUCTS } from '@/data/products';
-import { addDoc, collection, getDocs } from 'firebase/firestore';
+import { addDoc, collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { CATEGORIES } from '@/data/categories';
 import { Product } from '@/types';
@@ -30,6 +30,7 @@ const AdminProducts: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>([...ALL_PRODUCTS]);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [newProduct, setNewProduct] = useState<NewProduct>({
     name: '',
     category: '',
@@ -53,7 +54,7 @@ const AdminProducts: React.FC = () => {
           id: doc.id,
           ...doc.data()
         })) as Product[];
-        
+
         // Combine Firebase products with ALL_PRODUCTS
         const allProducts = [...ALL_PRODUCTS, ...firebaseProducts];
         setProducts(allProducts);
@@ -85,8 +86,15 @@ const AdminProducts: React.FC = () => {
         ...newProduct,
         id: docRef.id
       } as Product;
+
+      const updatedProducts = [...products, newProductWithId];
+      setProducts(updatedProducts);
+
+      // Update localStorage to sync with products page
+      localStorage.setItem('adminProducts', JSON.stringify(updatedProducts));
       
-      setProducts(prevProducts => [...prevProducts, newProductWithId]);
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new CustomEvent('productsUpdated'));
 
       setIsModalOpen(false);
       setNewProduct({
@@ -108,6 +116,100 @@ const AdminProducts: React.FC = () => {
       alert('Failed to add product');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEditProduct = (product: Product) => {
+    setNewProduct({
+      name: product.name,
+      category: product.category,
+      price: product.price,
+      originalPrice: product.originalPrice,
+      description: product.description,
+      imageUrl: product.imageUrl,
+      stock: product.stock,
+      featured: product.featured,
+      bestseller: product.bestseller,
+      new: product.new,
+      currency: product.currency,
+      rating: product.rating || 0,
+      reviews: product.reviews || 0
+    });
+    setEditingProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const handleUpdateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProduct) return;
+    
+    setLoading(true);
+
+    try {
+      // Update Firebase if it's a Firebase product
+      if (!editingProduct.id.startsWith('product-') && !editingProduct.id.startsWith('clothing-')) {
+        const productRef = doc(db, 'products', editingProduct.id);
+        await updateDoc(productRef, {
+          ...newProduct,
+          updatedAt: new Date().toISOString()
+        });
+      }
+
+      // Update local state
+      const updatedProducts = products.map(p => 
+        p.id === editingProduct.id 
+          ? { ...newProduct, id: editingProduct.id } as Product
+          : p
+      );
+      setProducts(updatedProducts);
+
+      // Update localStorage
+      localStorage.setItem('adminProducts', JSON.stringify(updatedProducts));
+      window.dispatchEvent(new CustomEvent('productsUpdated'));
+
+      setIsModalOpen(false);
+      setEditingProduct(null);
+      setNewProduct({
+        name: '',
+        category: '',
+        price: 0,
+        description: '',
+        imageUrl: '',
+        stock: 0,
+        featured: false,
+        bestseller: false,
+        new: false,
+        currency: '$',
+        rating: 0,
+        reviews: 0
+      });
+    } catch (error) {
+      console.error('Error updating product:', error);
+      alert('Failed to update product');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteProduct = async (product: Product) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+
+    try {
+      // Delete from Firebase if it's a Firebase product
+      if (!product.id.startsWith('product-') && !product.id.startsWith('clothing-')) {
+        await deleteDoc(doc(db, 'products', product.id));
+      }
+
+      // Update local state
+      const updatedProducts = products.filter(p => p.id !== product.id);
+      setProducts(updatedProducts);
+
+      // Update localStorage
+      localStorage.setItem('adminProducts', JSON.stringify(updatedProducts));
+      window.dispatchEvent(new CustomEvent('productsUpdated'));
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Failed to delete product');
     }
   };
 
@@ -206,10 +308,16 @@ const AdminProducts: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button className="text-primary-600 hover:text-primary-900 mr-4">
+                        <button 
+                          onClick={() => handleEditProduct(product)}
+                          className="text-primary-600 hover:text-primary-900 mr-4"
+                        >
                           <Edit2 size={18} />
                         </button>
-                        <button className="text-red-600 hover:text-red-900">
+                        <button 
+                          onClick={() => handleDeleteProduct(product)}
+                          className="text-red-600 hover:text-red-900"
+                        >
                           <Trash2 size={18} />
                         </button>
                       </td>
@@ -226,16 +334,35 @@ const AdminProducts: React.FC = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">Add New Product</h2>
+                <h2 className="text-2xl font-bold">
+                  {editingProduct ? 'Edit Product' : 'Add New Product'}
+                </h2>
                 <button
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setEditingProduct(null);
+                    setNewProduct({
+                      name: '',
+                      category: '',
+                      price: 0,
+                      description: '',
+                      imageUrl: '',
+                      stock: 0,
+                      featured: false,
+                      bestseller: false,
+                      new: false,
+                      currency: '$',
+                      rating: 0,
+                      reviews: 0
+                    });
+                  }}
                   className="text-gray-500 hover:text-gray-700"
                 >
                   <X size={24} />
                 </button>
               </div>
 
-              <form onSubmit={handleAddProduct} className="space-y-6">
+              <form onSubmit={editingProduct ? handleUpdateProduct : handleAddProduct} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Product Name *
@@ -369,7 +496,7 @@ const AdminProducts: React.FC = () => {
                     variant="primary"
                     isLoading={loading}
                   >
-                    Add Product
+                    {editingProduct ? 'Update Product' : 'Add Product'}
                   </Button>
                 </div>
               </form>

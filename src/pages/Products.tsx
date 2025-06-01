@@ -7,6 +7,8 @@ import { Link } from 'react-router-dom';
 import { CATEGORIES } from '@/data/categories';
 import { Product } from '@/types';
 import { ALL_PRODUCTS } from '@/data/products';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/config/firebase';
 
 const Products: React.FC = () => {
   const { addItem } = useCart();
@@ -20,25 +22,72 @@ const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>(ALL_PRODUCTS);
 
   useEffect(() => {
-    // Load initial products
-    const storedProducts = localStorage.getItem('adminProducts');
-    if (storedProducts) {
-      setProducts(JSON.parse(storedProducts));
-    }
+    const loadProducts = async () => {
+      try {
+        // Load Firebase products
+        const querySnapshot = await getDocs(collection(db, 'products'));
+        const firebaseProducts = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Product[];
+
+        // Combine with static products
+        const allProducts = [...ALL_PRODUCTS, ...firebaseProducts];
+        setProducts(allProducts);
+        
+        // Update localStorage for admin sync
+        localStorage.setItem('adminProducts', JSON.stringify(allProducts));
+      } catch (error) {
+        console.error('Error loading products:', error);
+        // Fallback to localStorage or static products
+        const storedProducts = localStorage.getItem('adminProducts');
+        if (storedProducts) {
+          try {
+            setProducts(JSON.parse(storedProducts));
+          } catch (parseError) {
+            console.error('Error parsing stored products:', parseError);
+            setProducts(ALL_PRODUCTS);
+          }
+        } else {
+          setProducts(ALL_PRODUCTS);
+        }
+      }
+    };
+
+    loadProducts();
 
     // Listen for changes
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'adminProducts' && e.newValue) {
-        setProducts(JSON.parse(e.newValue));
+        try {
+          setProducts(JSON.parse(e.newValue));
+        } catch (error) {
+          console.error('Error parsing updated products:', error);
+        }
       }
     };
 
-    // Listen for storage events
+    // Custom event listener for same-window updates
+    const handleCustomUpdate = () => {
+      const storedProducts = localStorage.getItem('adminProducts');
+      if (storedProducts) {
+        try {
+          setProducts(JSON.parse(storedProducts));
+        } catch (error) {
+          console.error('Error parsing updated products:', error);
+        }
+      }
+    };
+
+    // Listen for storage events (cross-window)
     window.addEventListener('storage', handleStorageChange);
+    // Listen for custom events (same-window)
+    window.addEventListener('productsUpdated', handleCustomUpdate);
 
     // Cleanup
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('productsUpdated', handleCustomUpdate);
     };
   }, []);
 
