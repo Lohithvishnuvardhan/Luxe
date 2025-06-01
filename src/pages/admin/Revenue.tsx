@@ -105,7 +105,7 @@ const Revenue: React.FC = () => {
                     <YAxis 
                       stroke="#6b7280"
                       tick={{ fill: '#6b7280' }}
-                      tickFormatter={(value) => `$${value}`}
+                      tickFormatter={(value: any) => `$${value}`}
                     />
                     <Tooltip
                       contentStyle={{
@@ -113,7 +113,7 @@ const Revenue: React.FC = () => {
                         border: '1px solid #e5e7eb',
                         borderRadius: '0.5rem',
                       }}
-                      formatter={(value) => [`$${value}`, 'Revenue']}
+                      formatter={(value: any) => [`$${value}`, 'Revenue']}
                     />
                     <Line
                       type="monotone"

@@ -1,11 +1,12 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Container from '@/components/ui/Container';
 import { ShoppingCart, Heart, Eye, Search, Star } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Link } from 'react-router-dom';
-import { ALL_PRODUCTS } from '@/data/products';
 import { CATEGORIES } from '@/data/categories';
+import { Product } from '@/types';
+import { ALL_PRODUCTS } from '@/data/products';
 
 const Products: React.FC = () => {
   const { addItem } = useCart();
@@ -13,19 +14,38 @@ const Products: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('featured');
   const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
+  const [] = useState<{ [key: string]: boolean }>({});
   const rotationRefs = useRef<{ [key: string]: { x: number; y: number } }>({});
   const productRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const [products, setProducts] = useState<Product[]>(ALL_PRODUCTS);
 
-  // Get products from localStorage or use default ALL_PRODUCTS
-  const [products] = useState(() => {
-    const savedProducts = localStorage.getItem('products');
-    return savedProducts ? JSON.parse(savedProducts) : ALL_PRODUCTS;
-  });
+  useEffect(() => {
+    // Load initial products
+    const storedProducts = localStorage.getItem('adminProducts');
+    if (storedProducts) {
+      setProducts(JSON.parse(storedProducts));
+    }
 
-  const filteredProducts = products.filter((product: { category: string; name: string; description: string; price: number; }) => {
+    // Listen for changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'adminProducts' && e.newValue) {
+        setProducts(JSON.parse(e.newValue));
+      }
+    };
+
+    // Listen for storage events
+    window.addEventListener('storage', handleStorageChange);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
+  const filteredProducts = products.filter(product => {
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchQuery.toLowerCase());
+                         product.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesPrice = product.price >= priceRange.min && product.price <= priceRange.max;
     return matchesCategory && matchesSearch && matchesPrice;
   });
@@ -39,9 +59,9 @@ const Products: React.FC = () => {
       case 'name':
         return a.name.localeCompare(b.name);
       case 'rating':
-        return b.rating - a.rating;
+        return (b.rating || 0) - (a.rating || 0);
       default:
-        return b.rating - a.rating;
+        return (b.rating || 0) - (a.rating || 0);
     }
   });
 
@@ -221,7 +241,7 @@ const Products: React.FC = () => {
                     </Link>
                     <div className="flex items-center">
                       <Star className="w-5 h-5 text-accent-500" />
-                      <span className="ml-1 text-sm text-gray-600">{product.rating}</span>
+                      <span className="ml-1 text-sm text-gray-600">{product.rating || 0}</span>
                     </div>
                   </div>
 
@@ -234,15 +254,15 @@ const Products: React.FC = () => {
                       {product.originalPrice ? (
                         <div className="flex items-center gap-2">
                           <span className="text-2xl font-bold text-gray-900">
-                            {product.currency}{product.price}
+                            {product.currency || '$'}{product.price}
                           </span>
                           <span className="text-lg text-gray-500 line-through">
-                            {product.currency}{product.originalPrice}
+                            {product.currency || '$'}{product.originalPrice}
                           </span>
                         </div>
                       ) : (
                         <span className="text-2xl font-bold text-gray-900">
-                          {product.currency}{product.price}
+                          {product.currency || '$'}{product.price}
                         </span>
                       )}
                     </div>

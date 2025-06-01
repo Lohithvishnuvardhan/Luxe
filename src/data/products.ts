@@ -1,5 +1,4 @@
 import { Product } from '@/types';
-
 export const FEATURED_PRODUCTS: Product[] = [
   {
     id: 'product-1',
@@ -401,3 +400,6 @@ export const ALL_PRODUCTS: Product[] = [
     stock: 25
   }
 ];
+export const updateStoredProducts = (products: Product[]) => {
+  localStorage.setItem('products', JSON.stringify(products));
+};

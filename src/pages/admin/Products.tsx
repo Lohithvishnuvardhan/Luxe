@@ -1,117 +1,115 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
 import { Plus, Edit2, Trash2, X } from 'lucide-react';
 import { ALL_PRODUCTS } from '@/data/products';
+import { addDoc, collection, getDocs } from 'firebase/firestore';
+import { db } from '@/config/firebase';
 import { CATEGORIES } from '@/data/categories';
 import { Product } from '@/types';
 
+interface NewProduct {
+  name: string;
+  category: string;
+  price: number;
+  originalPrice?: number;
+  description: string;
+  imageUrl: string;
+  stock: number;
+  featured: boolean;
+  bestseller: boolean;
+  new: boolean;
+  currency: string;
+  rating: number;
+  reviews: number;
+}
+
 const AdminProducts: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [products, setProducts] = useState(ALL_PRODUCTS);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [formData, setFormData] = useState<Partial<Product>>({
-    currency: '$',
-    rating: 4.5,
-    reviews: 0,
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState<Product[]>([...ALL_PRODUCTS]);
+  const [newProduct, setNewProduct] = useState<NewProduct>({
+    name: '',
+    category: '',
+    price: 0,
+    description: '',
+    imageUrl: '',
+    stock: 0,
     featured: false,
     bestseller: false,
-    new: true
+    new: false,
+    currency: '$',
+    rating: 0,
+    reviews: 0
   });
 
-  const handleOpenModal = (product?: Product) => {
-    if (product) {
-      setEditingProduct(product);
-      setFormData(product);
-    } else {
-      setEditingProduct(null);
-      setFormData({
-        currency: '$',
-        rating: 4.5,
-        reviews: 0,
-        featured: false,
-        bestseller: false,
-        new: true
-      });
-    }
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setEditingProduct(null);
-    setFormData({
-      currency: '$',
-      rating: 4.5,
-      reviews: 0,
-      featured: false,
-      bestseller: false,
-      new: true
-    });
-  };
-
-  const handleSaveProduct = () => {
-    if (!formData.name || !formData.price || !formData.category || !formData.imageUrl) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
-    const productData: Product = {
-      id: editingProduct?.id || `product-${Date.now()}`,
-      name: formData.name,
-      description: formData.description || '',
-      price: Number(formData.price),
-      originalPrice: formData.originalPrice ? Number(formData.originalPrice) : undefined,
-      currency: formData.currency || '$',
-      imageUrl: formData.imageUrl,
-      category: formData.category,
-      featured: formData.featured || false,
-      bestseller: formData.bestseller || false,
-      new: formData.new || false,
-      rating: formData.rating || 4.5,
-      reviews: formData.reviews || 0,
-      stock: Number(formData.stock) || 0
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'products'));
+        const firebaseProducts = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Product[];
+        
+        // Combine Firebase products with ALL_PRODUCTS
+        const allProducts = [...ALL_PRODUCTS, ...firebaseProducts];
+        setProducts(allProducts);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
     };
 
-    if (editingProduct) {
-      // Update existing product
-      const updatedProducts = products.map(p => 
-        p.id === editingProduct.id ? productData : p
-      );
-      setProducts(updatedProducts);
-      
-      // Update ALL_PRODUCTS array
-      const index = ALL_PRODUCTS.findIndex(p => p.id === editingProduct.id);
-      if (index !== -1) {
-        ALL_PRODUCTS[index] = productData;
-      }
-    } else {
-      // Add new product
-      setProducts(prev => [...prev, productData]);
-      ALL_PRODUCTS.push(productData);
-    }
-    
-    handleCloseModal();
-  };
-
-  const handleDeleteProduct = (productId: string) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      // Remove from local state
-      setProducts(prev => prev.filter(p => p.id !== productId));
-      
-      // Remove from ALL_PRODUCTS array
-      const index = ALL_PRODUCTS.findIndex(p => p.id === productId);
-      if (index !== -1) {
-        ALL_PRODUCTS.splice(index, 1);
-      }
-    }
-  };
+    fetchProducts();
+  }, []);
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleAddProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Add to Firebase
+      const docRef = await addDoc(collection(db, 'products'), {
+        ...newProduct,
+        createdAt: new Date().toISOString()
+      });
+
+      // Add to local state
+      const newProductWithId = {
+        ...newProduct,
+        id: docRef.id
+      } as Product;
+      
+      setProducts(prevProducts => [...prevProducts, newProductWithId]);
+
+      setIsModalOpen(false);
+      setNewProduct({
+        name: '',
+        category: '',
+        price: 0,
+        description: '',
+        imageUrl: '',
+        stock: 0,
+        featured: false,
+        bestseller: false,
+        new: false,
+        currency: '$',
+        rating: 0,
+        reviews: 0
+      });
+    } catch (error) {
+      console.error('Error adding product:', error);
+      alert('Failed to add product');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="py-24">
@@ -126,7 +124,7 @@ const AdminProducts: React.FC = () => {
             <Button
               variant="primary"
               leftIcon={<Plus size={20} />}
-              onClick={() => handleOpenModal()}
+              onClick={() => setIsModalOpen(true)}
             >
               Add Product
             </Button>
@@ -143,9 +141,9 @@ const AdminProducts: React.FC = () => {
               />
             </div>
 
-            <div className="overflow-x-auto max-h-[600px]">
+            <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 sticky top-0">
+                <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Product
@@ -208,16 +206,10 @@ const AdminProducts: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button 
-                          className="text-primary-600 hover:text-primary-900 mr-4"
-                          onClick={() => handleOpenModal(product)}
-                        >
+                        <button className="text-primary-600 hover:text-primary-900 mr-4">
                           <Edit2 size={18} />
                         </button>
-                        <button 
-                          className="text-red-600 hover:text-red-900"
-                          onClick={() => handleDeleteProduct(product.id)}
-                        >
+                        <button className="text-red-600 hover:text-red-900">
                           <Trash2 size={18} />
                         </button>
                       </td>
@@ -228,166 +220,163 @@ const AdminProducts: React.FC = () => {
             </div>
           </div>
         </motion.div>
-      </Container>
 
-      {/* Product Modal (Add/Edit) */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-serif font-bold">
-                {editingProduct ? 'Edit Product' : 'Add New Product'}
-              </h2>
-              <button onClick={handleCloseModal} className="text-gray-500 hover:text-gray-700">
-                <X size={24} />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Product Name *
-                </label>
-                <input
-                  type="text"
-                  value={formData.name || ''}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category *
-                </label>
-                <select
-                  value={formData.category || ''}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                  required
+        {/* Add Product Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">Add New Product</h2>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  <option value="">Select Category</option>
-                  {CATEGORIES.map(category => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
+                  <X size={24} />
+                </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={handleAddProduct} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Price *
+                    Product Name *
                   </label>
                   <input
-                    type="number"
-                    value={formData.price || ''}
-                    onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    type="text"
                     required
+                    value={newProduct.name}
+                    onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Original Price
+                    Category *
+                  </label>
+                  <select
+                    required
+                    value={newProduct.category}
+                    onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="">Select Category</option>
+                    {CATEGORIES.map(category => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Price *
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      value={newProduct.price}
+                      onChange={(e) => setNewProduct({ ...newProduct, price: Number(e.target.value) })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Original Price
+                    </label>
+                    <input
+                      type="number"
+                      value={newProduct.originalPrice || ''}
+                      onChange={(e) => setNewProduct({ ...newProduct, originalPrice: Number(e.target.value) })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description *
+                  </label>
+                  <textarea
+                    required
+                    value={newProduct.description}
+                    onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    rows={4}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Image URL *
                   </label>
                   <input
-                    type="number"
-                    value={formData.originalPrice || ''}
-                    onChange={(e) => setFormData({ ...formData, originalPrice: Number(e.target.value) })}
+                    type="url"
+                    required
+                    value={newProduct.imageUrl}
+                    onChange={(e) => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
-                <textarea
-                  value={formData.description || ''}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                  rows={4}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Image URL *
-                </label>
-                <input
-                  type="url"
-                  value={formData.imageUrl || ''}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Stock
-                </label>
-                <input
-                  type="number"
-                  value={formData.stock || ''}
-                  onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                />
-              </div>
-
-              <div className="flex items-center space-x-4">
-                <label className="flex items-center">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Stock *
+                  </label>
                   <input
-                    type="checkbox"
-                    checked={formData.featured || false}
-                    onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                    className="mr-2"
+                    type="number"
+                    required
+                    value={newProduct.stock}
+                    onChange={(e) => setNewProduct({ ...newProduct, stock: Number(e.target.value) })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
                   />
-                  Featured
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.bestseller || false}
-                    onChange={(e) => setFormData({ ...formData, bestseller: e.target.checked })}
-                    className="mr-2"
-                  />
-                  Bestseller
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.new || false}
-                    onChange={(e) => setFormData({ ...formData, new: e.target.checked })}
-                    className="mr-2"
-                  />
-                  New Arrival
-                </label>
-              </div>
+                </div>
 
-              <div className="flex justify-end space-x-4 mt-6">
-                <Button
-                  variant="outline"
-                  onClick={handleCloseModal}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={handleSaveProduct}
-                >
-                  {editingProduct ? 'Save Changes' : 'Add Product'}
-                </Button>
-              </div>
+                <div className="flex gap-4">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={newProduct.featured}
+                      onChange={(e) => setNewProduct({ ...newProduct, featured: e.target.checked })}
+                      className="mr-2"
+                    />
+                    Featured
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={newProduct.bestseller}
+                      onChange={(e) => setNewProduct({ ...newProduct, bestseller: e.target.checked })}
+                      className="mr-2"
+                    />
+                    Bestseller
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={newProduct.new}
+                      onChange={(e) => setNewProduct({ ...newProduct, new: e.target.checked })}
+                      className="mr-2"
+                    />
+                    New Arrival
+                  </label>
+                </div>
+
+                <div className="flex justify-end gap-4">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    isLoading={loading}
+                  >
+                    Add Product
+                  </Button>
+                </div>
+              </form>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Container>
     </div>
   );
 };
