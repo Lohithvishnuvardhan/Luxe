@@ -42,8 +42,8 @@ const AdminProducts: React.FC = () => {
     bestseller: false,
     new: false,
     currency: '$',
-    rating: 0,
-    reviews: 0
+    rating: 4.5, // Default rating
+    reviews: Math.floor(Math.random() * (100 - 20) + 20) // Random reviews between 20-100
   });
 
   useEffect(() => {
@@ -75,15 +75,22 @@ const AdminProducts: React.FC = () => {
     setLoading(true);
 
     try {
+      // Ensure rating and reviews are set
+      const productToAdd = {
+        ...newProduct,
+        rating: newProduct.rating || 4.5,
+        reviews: newProduct.reviews || Math.floor(Math.random() * (100 - 20) + 20)
+      };
+
       // Add to Firebase
       const docRef = await addDoc(collection(db, 'products'), {
-        ...newProduct,
+        ...productToAdd,
         createdAt: new Date().toISOString()
       });
 
       // Add to local state
       const newProductWithId = {
-        ...newProduct,
+        ...productToAdd,
         id: docRef.id
       } as Product;
 
@@ -108,8 +115,8 @@ const AdminProducts: React.FC = () => {
         bestseller: false,
         new: false,
         currency: '$',
-        rating: 0,
-        reviews: 0
+        rating: 4.5,
+        reviews: Math.floor(Math.random() * (100 - 20) + 20)
       });
     } catch (error) {
       console.error('Error adding product:', error);
@@ -132,8 +139,8 @@ const AdminProducts: React.FC = () => {
       bestseller: product.bestseller,
       new: product.new,
       currency: product.currency,
-      rating: product.rating || 0,
-      reviews: product.reviews || 0
+      rating: product.rating || 4.5,
+      reviews: product.reviews || Math.floor(Math.random() * (100 - 20) + 20)
     });
     setEditingProduct(product);
     setIsModalOpen(true);
@@ -180,8 +187,8 @@ const AdminProducts: React.FC = () => {
         bestseller: false,
         new: false,
         currency: '$',
-        rating: 0,
-        reviews: 0
+        rating: 4.5,
+        reviews: Math.floor(Math.random() * (100 - 20) + 20)
       });
     } catch (error) {
       console.error('Error updating product:', error);
@@ -260,6 +267,9 @@ const AdminProducts: React.FC = () => {
                       Stock
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Rating
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -298,6 +308,9 @@ const AdminProducts: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {product.stock}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {product.rating} ({product.reviews} reviews)
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           product.stock > 0
@@ -327,182 +340,198 @@ const AdminProducts: React.FC = () => {
               </table>
             </div>
           </div>
-        </motion.div>
 
-        {/* Add Product Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">
-                  {editingProduct ? 'Edit Product' : 'Add New Product'}
-                </h2>
-                <button
-                  onClick={() => {
-                    setIsModalOpen(false);
-                    setEditingProduct(null);
-                    setNewProduct({
-                      name: '',
-                      category: '',
-                      price: 0,
-                      description: '',
-                      imageUrl: '',
-                      stock: 0,
-                      featured: false,
-                      bestseller: false,
-                      new: false,
-                      currency: '$',
-                      rating: 0,
-                      reviews: 0
-                    });
-                  }}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              <form onSubmit={editingProduct ? handleUpdateProduct : handleAddProduct} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Product Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={newProduct.name}
-                    onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Category *
-                  </label>
-                  <select
-                    required
-                    value={newProduct.category}
-                    onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+          {/* Add/Edit Product Modal */}
+          {isModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold">
+                    {editingProduct ? 'Edit Product' : 'Add New Product'}
+                  </h2>
+                  <button
+                    onClick={() => {
+                      setIsModalOpen(false);
+                      setEditingProduct(null);
+                      setNewProduct({
+                        name: '',
+                        category: '',
+                        price: 0,
+                        description: '',
+                        imageUrl: '',
+                        stock: 0,
+                        featured: false,
+                        bestseller: false,
+                        new: false,
+                        currency: '$',
+                        rating: 4.5,
+                        reviews: Math.floor(Math.random() * (100 - 20) + 20)
+                      });
+                    }}
+                    className="text-gray-500 hover:text-gray-700"
                   >
-                    <option value="">Select Category</option>
-                    {CATEGORIES.map(category => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
+                    <X size={24} />
+                  </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <form onSubmit={editingProduct ? handleUpdateProduct : handleAddProduct} className="space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Price *
+                      Product Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newProduct.name}
+                      onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Category *
+                    </label>
+                    <select
+                      required
+                      value={newProduct.category}
+                      onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Select Category</option>
+                      {CATEGORIES.map(category => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Price *
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        value={newProduct.price}
+                        onChange={(e) => setNewProduct({ ...newProduct, price: Number(e.target.value) })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Original Price
+                      </label>
+                      <input
+                        type="number"
+                        value={newProduct.originalPrice || ''}
+                        onChange={(e) => setNewProduct({ ...newProduct, originalPrice: Number(e.target.value) })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Description *
+                    </label>
+                    <textarea
+                      required
+                      value={newProduct.description}
+                      onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Image URL *
+                    </label>
+                    <input
+                      type="url"
+                      required
+                      value={newProduct.imageUrl}
+                      onChange={(e) => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Stock *
                     </label>
                     <input
                       type="number"
                       required
-                      value={newProduct.price}
-                      onChange={(e) => setNewProduct({ ...newProduct, price: Number(e.target.value) })}
+                      value={newProduct.stock}
+                      onChange={(e) => setNewProduct({ ...newProduct, stock: Number(e.target.value) })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md"
                     />
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Original Price
+                      Rating (1-5) *
                     </label>
                     <input
                       type="number"
-                      value={newProduct.originalPrice || ''}
-                      onChange={(e) => setNewProduct({ ...newProduct, originalPrice: Number(e.target.value) })}
+                      required
+                      min="1"
+                      max="5"
+                      step="0.1"
+                      value={newProduct.rating}
+                      onChange={(e) => setNewProduct({ ...newProduct, rating: Number(e.target.value) })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md"
                     />
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description *
-                  </label>
-                  <textarea
-                    required
-                    value={newProduct.description}
-                    onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                    rows={4}
-                  />
-                </div>
+                  <div className="flex gap-4">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={newProduct.featured}
+                        onChange={(e) => setNewProduct({ ...newProduct, featured: e.target.checked })}
+                        className="mr-2"
+                      />
+                      Featured
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={newProduct.bestseller}
+                        onChange={(e) => setNewProduct({ ...newProduct, bestseller: e.target.checked })}
+                        className="mr-2"
+                      />
+                      Bestseller
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={newProduct.new}
+                        onChange={(e) => setNewProduct({ ...newProduct, new: e.target.checked })}
+                        className="mr-2"
+                      />
+                      New Arrival
+                    </label>
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Image URL *
-                  </label>
-                  <input
-                    type="url"
-                    required
-                    value={newProduct.imageUrl}
-                    onChange={(e) => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Stock *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={newProduct.stock}
-                    onChange={(e) => setNewProduct({ ...newProduct, stock: Number(e.target.value) })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-
-                <div className="flex gap-4">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={newProduct.featured}
-                      onChange={(e) => setNewProduct({ ...newProduct, featured: e.target.checked })}
-                      className="mr-2"
-                    />
-                    Featured
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={newProduct.bestseller}
-                      onChange={(e) => setNewProduct({ ...newProduct, bestseller: e.target.checked })}
-                      className="mr-2"
-                    />
-                    Bestseller
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={newProduct.new}
-                      onChange={(e) => setNewProduct({ ...newProduct, new: e.target.checked })}
-                      className="mr-2"
-                    />
-                    New Arrival
-                  </label>
-                </div>
-
-                <div className="flex justify-end gap-4">
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    isLoading={loading}
-                  >
-                    {editingProduct ? 'Update Product' : 'Add Product'}
-                  </Button>
-                </div>
-              </form>
+                  <div className="flex justify-end gap-4">
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      isLoading={loading}
+                    >
+                      {editingProduct ? 'Update Product' : 'Add Product'}
+                    </Button>
+                  </div>
+                </form>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </motion.div>
       </Container>
     </div>
   );
