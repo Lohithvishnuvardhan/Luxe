@@ -62,21 +62,21 @@ function App() {
                 <Route path="reset-password" element={<ResetPassword />} />
 
                 {/* Protected Routes */}
-                <Route path="products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
-                <Route path="about" element={<ProtectedRoute><About /></ProtectedRoute>} />
-                <Route path="cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
-                <Route path="checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-                <Route path="contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
-                <Route path="products/:id" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />
-                <Route path="faq" element={<ProtectedRoute><FAQ /></ProtectedRoute>} />
-                <Route path="shipping" element={<ProtectedRoute><ShippingReturns /></ProtectedRoute>} />
-                <Route path="privacy" element={<ProtectedRoute><PrivacyPolicy /></ProtectedRoute>} />
-                <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                <Route path="business-details" element={<ProtectedRoute><BusinessDetails /></ProtectedRoute>} />
-                <Route path="orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-                <Route path="wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
-                <Route path="terms" element={<ProtectedRoute><Terms /></ProtectedRoute>} />
-                <Route path="blog" element={<ProtectedRoute><Blog /></ProtectedRoute>} />
+                <Route path="products" element={<Products />} />
+                <Route path="about" element={<About />} />
+                <Route path="cart" element={<Cart />} />
+                <Route path="checkout" element={<Checkout />} />
+                <Route path="contact" element={<Contact />} />
+                <Route path="products/:id" element={<ProductDetails />} />
+                <Route path="faq" element={<FAQ />} />
+                <Route path="shipping" element={<ShippingReturns />} />
+                <Route path="privacy" element={<PrivacyPolicy />} />
+                <Route path="profile" element={<Profile />} />
+                <Route path="business-details" element={<BusinessDetails />} />
+                <Route path="orders" element={<Orders />} />
+                <Route path="wishlist" element={<Wishlist />} />
+                <Route path="terms" element={<Terms />} />
+                <Route path="blog" element={<Blog />} />
 
                 <Route path="*" element={<NotFound />} />
               </Route>

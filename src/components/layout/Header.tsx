@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ShoppingCart, Menu, X, Search, User } from 'lucide-react';
 import Container from '../ui/Container';
 import { useCart } from '@/contexts/CartContext';
@@ -10,6 +10,7 @@ const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { items } = useCart();
   const { isAdmin } = useAuth();
+  const location = useLocation();
   
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
 
@@ -26,23 +27,30 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location]);
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'
       }`}
+      role="banner"
     >
       <Container>
         <div className="flex items-center justify-between">
           <Link 
             to="/" 
             className="text-2xl font-serif font-bold text-primary-600"
+            aria-label="LuxeCommerce Home"
           >
             LuxeCommerce
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-8" aria-label="Main navigation">
             <Link to="/" className="font-medium text-gray-800 hover:text-accent-500 transition-colors">
               Home
             </Link>
@@ -64,18 +72,23 @@ const Header: React.FC = () => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <button className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300 transform hover:scale-105">
+            <button 
+              className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300 transform hover:scale-105"
+              aria-label="Search"
+            >
               <Search size={20} />
             </button>
             <Link 
               to="/profile"
               className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300 transform hover:scale-105"
+              aria-label="Profile"
             >
               <User size={20} />
             </Link>
             <Link 
               to="/cart" 
               className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300 transform hover:scale-105 relative"
+              aria-label={`Shopping cart with ${totalItems} items`}
             >
               <ShoppingCart size={20} />
               {totalItems > 0 && (
@@ -91,6 +104,7 @@ const Header: React.FC = () => {
             <Link 
               to="/cart" 
               className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300 relative"
+              aria-label={`Shopping cart with ${totalItems} items`}
             >
               <ShoppingCart size={20} />
               {totalItems > 0 && (
@@ -102,6 +116,8 @@ const Header: React.FC = () => {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300"
+              aria-expanded={isMobileMenuOpen}
+              aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -111,8 +127,12 @@ const Header: React.FC = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white shadow-lg absolute top-full left-0 right-0">
-          <div className="py-4 px-4 space-y-4">
+        <div 
+          className="md:hidden bg-white shadow-lg absolute top-full left-0 right-0"
+          role="dialog"
+          aria-label="Mobile menu"
+        >
+          <nav className="py-4 px-4 space-y-4">
             <Link 
               to="/" 
               className="block font-medium text-gray-800 hover:text-accent-500 py-2"
@@ -151,18 +171,22 @@ const Header: React.FC = () => {
               </Link>
             )}
             <div className="flex items-center space-x-4 pt-2">
-              <button className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300">
+              <button 
+                className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300"
+                aria-label="Search"
+              >
                 <Search size={20} />
               </button>
               <Link
                 to="/profile"
                 className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300"
                 onClick={() => setIsMobileMenuOpen(false)}
+                aria-label="Profile"
               >
                 <User size={20} />
               </Link>
             </div>
-          </div>
+          </nav>
         </div>
       )}
     </header>

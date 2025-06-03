@@ -1,0 +1,16 @@
+{
+  "name": "LuxeCommerce",
+  "short_name": "LuxeCommerce",
+  "description": "Premium Shopping Experience",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F9F9F6",
+  "theme_color": "#1a1a1a",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml"
+    }
+  ]
+}
