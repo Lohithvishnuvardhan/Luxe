@@ -8,7 +8,6 @@ import Checkout from './pages/Checkout';
 import Products from './pages/Products';
 import ProductDetails from './pages/ProductDetails';
 import FAQ from './pages/FAQ';
-import ShippingReturns from './pages/ShippingReturns';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Profile from './pages/Profile';
 import Terms from './pages/Terms';
@@ -60,23 +59,58 @@ function App() {
                 <Route path="signup" element={<Signup />} />
                 <Route path="forgot-password" element={<ForgotPassword />} />
                 <Route path="reset-password" element={<ResetPassword />} />
+                <Route path="about" element={<About />} />
+                <Route path="contact" element={<Contact />} />
+                <Route path="faq" element={<FAQ />} />
+                <Route path="privacy" element={<PrivacyPolicy />} />
+                <Route path="terms" element={<Terms />} />
 
                 {/* Protected Routes */}
-                <Route path="products" element={<Products />} />
-                <Route path="about" element={<About />} />
-                <Route path="cart" element={<Cart />} />
-                <Route path="checkout" element={<Checkout />} />
-                <Route path="contact" element={<Contact />} />
-                <Route path="products/:id" element={<ProductDetails />} />
-                <Route path="faq" element={<FAQ />} />
-                <Route path="shipping" element={<ShippingReturns />} />
-                <Route path="privacy" element={<PrivacyPolicy />} />
-                <Route path="profile" element={<Profile />} />
-                <Route path="business-details" element={<BusinessDetails />} />
-                <Route path="orders" element={<Orders />} />
-                <Route path="wishlist" element={<Wishlist />} />
-                <Route path="terms" element={<Terms />} />
-                <Route path="blog" element={<Blog />} />
+                <Route path="products" element={
+                  <ProtectedRoute>
+                    <Products />
+                  </ProtectedRoute>
+                } />
+                <Route path="products/:id" element={
+                  <ProtectedRoute>
+                    <ProductDetails />
+                  </ProtectedRoute>
+                } />
+                <Route path="cart" element={
+                  <ProtectedRoute>
+                    <Cart />
+                  </ProtectedRoute>
+                } />
+                <Route path="checkout" element={
+                  <ProtectedRoute>
+                    <Checkout />
+                  </ProtectedRoute>
+                } />
+                <Route path="profile" element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } />
+                <Route path="business-details" element={
+                  <ProtectedRoute>
+                    <BusinessDetails />
+                  </ProtectedRoute>
+                } />
+                <Route path="orders" element={
+                  <ProtectedRoute>
+                    <Orders />
+                  </ProtectedRoute>
+                } />
+                <Route path="wishlist" element={
+                  <ProtectedRoute>
+                    <Wishlist />
+                  </ProtectedRoute>
+                } />
+                <Route path="blog" element={
+                  <ProtectedRoute>
+                    <Blog />
+                  </ProtectedRoute>
+                } />
 
                 <Route path="*" element={<NotFound />} />
               </Route>
