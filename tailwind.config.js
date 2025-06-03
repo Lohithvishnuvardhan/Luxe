@@ -27,12 +27,12 @@ export default {
           200: '#fce4ad',
           300: '#fbd584',
           400: '#f9c65b',
-          500: '#B8860B', // Dark Golden Rod
-          600: '#926c09',
-          700: '#6d5107',
-          800: '#483704',
-          900: '#241c02',
-          950: '#120e01',
+          500: '#C9B037', // Premium Gold
+          600: '#a18c2c',
+          700: '#796921',
+          800: '#514616',
+          900: '#28230b',
+          950: '#141205',
         },
         accent: {
           50: '#fdfbed',
@@ -40,45 +40,24 @@ export default {
           200: '#f8edb7',
           300: '#f5e493',
           400: '#f1da6f',
-          500: '#DAA520', // Golden Rod
-          600: '#ae841a',
-          700: '#836313',
-          800: '#57420d',
-          900: '#2c2106',
-          950: '#161103',
+          500: '#C9B037', // Premium Gold
+          600: '#a18c2c',
+          700: '#796921',
+          800: '#514616',
+          900: '#28230b',
+          950: '#141205',
         },
+        background: '#F9F9F6', // Ivory
+        text: '#111111', // Dark Charcoal
+        border: '#E0E0E0', // Soft Gray
       },
       boxShadow: {
         'subtle': '0 4px 20px -2px rgba(0, 0, 0, 0.08)',
-        'gold': '0 4px 20px -2px rgba(218, 165, 32, 0.25)',
+        'gold': '0 4px 20px -2px rgba(201, 176, 55, 0.25)',
         'premium': '0 20px 40px -8px rgba(0, 0, 0, 0.12)',
       },
-      animation: {
-        'fade-in': 'fadeIn 0.5s ease-in-out',
-        'slide-up': 'slideUp 0.5s ease-in-out',
-        'shimmer': 'shimmer 2s linear infinite',
-        'float': 'float 6s ease-in-out infinite',
-      },
-      keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        slideUp: {
-          '0%': { transform: 'translateY(20px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
-        },
-        shimmer: {
-          '0%': { backgroundPosition: '-200% 0' },
-          '100%': { backgroundPosition: '200% 0' },
-        },
-        float: {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-10px)' },
-        },
-      },
       backgroundImage: {
-        'gradient-gold': 'linear-gradient(45deg, #B8860B, #DAA520, #B8860B)',
+        'gradient-gold': 'linear-gradient(45deg, #C9B037, #E5CC4D, #C9B037)',
         'gradient-premium': 'linear-gradient(to right, #1a1a1a, #2d2d2d)',
       },
     },
