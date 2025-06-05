@@ -1,73 +1,83 @@
-> **NOTE**: This is a non-exclusive license. The Licensor retains the right to sell LuxeCommerce to multiple buyers.
-> Buyers are prohibited from reselling or distributing the source code or any derived version.
+> **NOTE**: This is a **non-exclusive, personal-use license**. The Licensor (owner) retains the right to sell LuxeCommerce to multiple buyers.  
+> **Buyers are strictly prohibited from reselling, sublicensing, or distributing the Software or any modified version, whether for free or for profit.**
 
 # LuxeCommerce Premium License Agreement
 
-**Version 1.0 - Effective Date: 2024**
+**Version 1.1 – Effective Date: 2024**
 
 ## 1. Definitions
 
-- "Software" refers to LuxeCommerce, including all source code, documentation, and associated materials.
-- "Licensor" refers to LuxeCommerce and its copyright holders.
-- "Licensee" refers to any person or entity obtaining a copy of the Software.
+- **"Software"** refers to LuxeCommerce, including all source code, design files, documentation, and associated materials.
+- **"Licensor"** refers to LuxeCommerce and its copyright holders.
+- **"Licensee"** refers to any person or entity who lawfully purchases a copy of the Software.
 
 ## 2. Grant of License
 
-Subject to the terms and conditions of this License Agreement, the Licensor hereby grants to the Licensee a non-exclusive, non-transferable, non-sublicensable license to use the Software for the purpose of:
+Subject to the terms and conditions of this Agreement, the Licensor grants the Licensee a **non-exclusive, non-transferable, non-sublicensable, personal-use license** to:
 
-a) Viewing and studying the Software
-b) Using the Software for internal business operations
-c) Modifying the Software for personal or internal business use
+a) View and study the Software  
+b) Use the Software for **personal or internal business purposes only**  
+c) Modify the Software **for personal/internal use only**
+
+> ✅ **This license is limited to one buyer per license.**  
+> ❌ **The Licensee may NOT distribute, resell, sublicense, or share the Software with any third party.**
 
 ## 3. Restrictions
 
-The Licensee shall not:
+The Licensee agrees **not to**:
 
-a) Distribute, sell, lease, rent, lend, or sublicense the Software
-b) Modify, derive, or reverse engineer the Software for commercial distribution
-c) Remove or alter any copyright notices or branding elements
-d) Use the Software in any way that violates applicable laws or regulations
-e) Transfer the rights granted under this License to any third party
+a) Distribute, resell, license, lease, rent, or share the Software, whether in original or modified form  
+b) Publish or upload the source code publicly (e.g., on GitHub, forums, templates marketplaces)  
+c) Use the Software to create derivative products for resale or redistribution  
+d) Remove, hide, or modify any copyright notices or branding without permission  
+e) Claim ownership or authorship of the Software  
+f) Transfer the rights granted under this License to any third party
 
-## 4. Intellectual Property
+## 4. Ownership and Intellectual Property
 
-- The Software is protected by copyright laws and international treaty provisions.
-- All intellectual property rights in the Software are owned by the Licensor.
-- This License does not grant any rights to trademarks, service marks, or trade names of the Licensor.
+- The Software is protected by copyright and intellectual property laws.  
+- All rights, title, and interest in the Software remain solely with the Licensor.  
+- The License does **not** grant ownership to the Licensee, only limited usage rights.
 
 ## 5. Limited Warranty and Liability
 
-- The Software is provided "AS IS" without warranty of any kind.
-- The Licensor shall not be liable for any damages arising out of the use or inability to use the Software.
-- The Licensee assumes all risks associated with the use of the Software.
+- The Software is provided **“as is”** without warranties of any kind.  
+- The Licensor shall not be liable for any damages or losses resulting from the use of the Software.  
+- The Licensee assumes full responsibility and risk for using the Software.
 
-## 6. Support and Maintenance
+## 6. Support and Updates
 
-- The Licensor is not obligated to provide technical support or maintenance services.
-- Any support or maintenance services provided shall be at the Licensor's discretion.
+- The Licensor is **not obligated** to provide support, updates, or bug fixes.  
+- Any additional services are offered at the sole discretion of the Licensor.
 
-## 7. Term and Termination
+## 7. Termination
 
-- This License is effective until terminated.
-- The Licensor may terminate this License if the Licensee fails to comply with any term.
-- Upon termination, the Licensee must cease all use of the Software and destroy all copies.
+- This License remains in effect until terminated.  
+- The Licensor may terminate this License if the Licensee violates any term of this agreement.  
+- Upon termination, the Licensee must stop using and destroy all copies of the Software.
 
-## 8. General Provisions
+## 8. Governing Law
 
-a) **Governing Law**: This License shall be governed by and construed in accordance with the laws of [Jurisdiction].
+This License shall be governed by and construed in accordance with the laws of **India**.
 
-b) **Entire Agreement**: This License constitutes the entire agreement between the parties.
+## 9. Entire Agreement
 
-c) **Severability**: If any provision of this License is held to be unenforceable, the remaining provisions shall remain in effect.
+This document represents the entire agreement between the parties regarding the Software.
 
-## 9. Premium Features and Services
+## 10. Severability
 
-Access to premium features and services may require additional agreements or subscriptions.
+If any part of this License is held to be invalid, the rest shall remain fully enforceable.
 
-## 10. Acknowledgment
+## 11. Premium Features and Services
 
-By using the Software, the Licensee acknowledges that they have read, understood, and agreed to be bound by the terms of this License.
+Some features or integrations may require additional agreements, licenses, or third-party services.
+
+## 12. Acknowledgment
+
+By using the Software, the Licensee agrees to all the terms above.
 
 ---
 
-Copyright © 2024 LuxeCommerce. All rights reserved.
+**Copyright © 2024 LuxeCommerce. All Rights Reserved.**  
+*Resale, redistribution, and public sharing are strictly prohibited.*  
+*Violators will be subject to legal action.*
