@@ -131,6 +131,15 @@ cd luxe-commerce
 # Install dependencies
 npm install
 ```
+### 🧩 Missing Dependency Fix (if error appears)
+
+If you see an error like:
+> "Error: The following dependencies are imported but could not be resolved: `react-helmet`, `react-helmet-async`"
+
+Just install the missing packages with:
+
+```bash
+npm install react-helmet react-helmet-async
 
 ### 2. Configuration
 Create `.env` in the root directory:
