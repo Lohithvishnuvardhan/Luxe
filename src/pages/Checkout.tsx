@@ -41,33 +41,54 @@ const Checkout: React.FC = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Create new order with timestamp
-    const newOrder = {
-      id: `ORD-${Math.random().toString(36).substr(2, 9)}`,
-      date: new Date().toISOString(),
-      items: items.map(item => ({
-        id: item.id,
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-        currency: item.currency,
-        imageUrl: item.imageUrl
-      })),
-      total: totalPrice,
-      status: 'processing'
-    };
+    try {
+      // Import Firebase functions and auth
+      const { createOrder } = await import('@/lib/orders');
+      const { auth } = await import('@/config/firebase');
 
-    // Get existing orders or initialize empty array
-    const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-    
-    // Add new order to beginning of array
-    localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
+      const currentUser = auth.currentUser;
+      
+      if (currentUser) {
+        // Create order in Firebase for authenticated users
+        await createOrder(
+          currentUser.uid,
+          items,
+          totalPrice
+        );
+      } else {
+        // Fallback to localStorage for non-authenticated users
+        const newOrder = {
+          id: `ORD-${Math.random().toString(36).substr(2, 9)}`,
+          date: new Date().toISOString(),
+          items: items.map(item => ({
+            id: item.id,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            currency: item.currency,
+            imageUrl: item.imageUrl
+          })),
+          total: totalPrice,
+          status: 'processing'
+        };
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setLoading(false);
-    setIsSuccessModalOpen(true);
-    clearCart();
+        // Get existing orders or initialize empty array
+        const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+        
+        // Add new order to beginning of array
+        localStorage.setItem('orders', JSON.stringify([newOrder, ...existingOrders]));
+      }
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setLoading(false);
+      setIsSuccessModalOpen(true);
+      clearCart();
+    } catch (error) {
+      console.error('Error creating order:', error);
+      setLoading(false);
+      alert('Failed to create order. Please try again.');
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

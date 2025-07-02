@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Container from '@/components/ui/Container';
-import { Truck, Package, RefreshCw, Clock } from 'lucide-react';
+import { Truck, RefreshCw } from 'lucide-react';
 
 const ShippingReturns: React.FC = () => {
   return (

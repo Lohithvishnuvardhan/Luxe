@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Container from '@/components/ui/Container';
 import { Search, Eye, Trash2, X } from 'lucide-react';
@@ -24,10 +24,39 @@ interface Order {
 const AdminOrders: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [orders, setOrders] = useState<Order[]>(() => {
-    const savedOrders = localStorage.getItem('orders');
-    return savedOrders ? JSON.parse(savedOrders) : [];
-  });
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAllOrders = async () => {
+      try {
+        const { collection, getDocs, orderBy, query } = await import('firebase/firestore');
+        const { db } = await import('@/config/firebase');
+        
+        const ordersRef = collection(db, 'orders');
+        const q = query(ordersRef, orderBy('date', 'desc'));
+        const querySnapshot = await getDocs(q);
+        
+        const allOrders = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as Order));
+        
+        setOrders(allOrders);
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+        // Fallback to localStorage
+        const savedOrders = localStorage.getItem('orders');
+        if (savedOrders) {
+          setOrders(JSON.parse(savedOrders));
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllOrders();
+  }, []);
 
   const filteredOrders = orders.filter(order =>
     order.id.toLowerCase().includes(searchQuery.toLowerCase())
@@ -50,6 +79,19 @@ const AdminOrders: React.FC = () => {
       minute: '2-digit'
     });
   };
+
+  if (loading) {
+    return (
+      <div className="py-24">
+        <Container>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
+            <h1 className="text-3xl font-serif font-bold mb-4">Loading Orders...</h1>
+          </div>
+        </Container>
+      </div>
+    );
+  }
 
   return (
     <div className="py-24">

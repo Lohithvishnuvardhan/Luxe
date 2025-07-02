@@ -1,37 +1,43 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Container from '@/components/ui/Container';
 import { Package, Clock, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { getUserOrders, Order } from '@/lib/orders';
 
-interface OrderItem {
-  id: string;
-  name: string;
-  quantity: number;
-  price: number;
-  currency: string;
-  imageUrl: string;
-}
-
-interface Order {
-  id: string;
-  date: string;
-  items: OrderItem[];
-  total: number;
-  status: 'processing' | 'shipped' | 'delivered';
-}
 
 const Orders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
-    // Get orders from localStorage
-    const savedOrders = localStorage.getItem('orders');
-    if (savedOrders) {
-      const parsedOrders = JSON.parse(savedOrders);
-      setOrders(parsedOrders);
-    }
-  }, []);
+    const fetchOrders = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const userOrders = await getUserOrders(user.uid);
+        setOrders(userOrders);
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+        // Fallback to localStorage for backwards compatibility
+        const savedOrders = localStorage.getItem('orders');
+        if (savedOrders) {
+          const parsedOrders = JSON.parse(savedOrders);
+          setOrders(parsedOrders);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [user]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -44,6 +50,43 @@ const Orders: React.FC = () => {
       hour12: true
     }).format(date);
   };
+
+  if (!user) {
+    return (
+      <div className="py-24">
+        <Container>
+          <div className="text-center">
+            <div className="mb-6">
+              <ShoppingBag className="w-16 h-16 text-gray-400 mx-auto" />
+            </div>
+            <h1 className="text-3xl font-serif font-bold mb-4">Please Sign In</h1>
+            <p className="text-gray-600 mb-8">You need to be signed in to view your orders.</p>
+            <Link 
+              to="/auth/login" 
+              className="inline-block bg-primary-600 text-white px-6 py-3 rounded-md hover:bg-primary-700 transition-colors"
+            >
+              Sign In
+            </Link>
+          </div>
+        </Container>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="py-24">
+        <Container>
+          <div className="text-center">
+            <div className="mb-6">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto"></div>
+            </div>
+            <h1 className="text-3xl font-serif font-bold mb-4">Loading Orders...</h1>
+          </div>
+        </Container>
+      </div>
+    );
+  }
 
   if (orders.length === 0) {
     return (

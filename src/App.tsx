@@ -13,6 +13,8 @@ import Profile from './pages/Profile';
 import Terms from './pages/Terms';
 import Blog from './pages/Blog';
 import NotFound from './pages/NotFound';
+import Refund from './pages/Refund';
+import Shipping from './pages/Shipping';
 import { CartProvider } from './contexts/CartContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { WishlistProvider } from './contexts/WishlistContext';
@@ -64,6 +66,8 @@ function App() {
                 <Route path="faq" element={<FAQ />} />
                 <Route path="privacy" element={<PrivacyPolicy />} />
                 <Route path="terms" element={<Terms />} />
+                <Route path="/refund" element={<Refund />} />
+                <Route path="/shipping" element={<Shipping />} />
 
                 {/* Protected Routes */}
                 <Route path="products" element={
