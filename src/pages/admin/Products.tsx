@@ -4,8 +4,7 @@ import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
 import { Plus, Edit2, Trash2, X } from 'lucide-react';
 import { ALL_PRODUCTS } from '@/data/products';
-import { addDoc, collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '@/config/firebase';
+import { addProduct, updateProduct, deleteProduct, getAllProducts } from '@/lib/supabase';
 import { CATEGORIES } from '@/data/categories';
 import { Product } from '@/types';
 
@@ -42,21 +41,15 @@ const AdminProducts: React.FC = () => {
     bestseller: false,
     new: false,
     currency: '$',
-    rating: 4.5, // Default rating
-    reviews: Math.floor(Math.random() * (100 - 20) + 20) // Random reviews between 20-100
+    rating: 4.5,
+    reviews: Math.floor(Math.random() * (100 - 20) + 20)
   });
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'products'));
-        const firebaseProducts = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Product[];
-
-        // Combine Firebase products with ALL_PRODUCTS
-        const allProducts = [...ALL_PRODUCTS, ...firebaseProducts];
+        const supabaseProducts = await getAllProducts();
+        const allProducts = [...ALL_PRODUCTS, ...supabaseProducts];
         setProducts(allProducts);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -75,32 +68,23 @@ const AdminProducts: React.FC = () => {
     setLoading(true);
 
     try {
-      // Ensure rating and reviews are set
       const productToAdd = {
         ...newProduct,
         rating: newProduct.rating || 4.5,
         reviews: newProduct.reviews || Math.floor(Math.random() * (100 - 20) + 20)
       };
 
-      // Add to Firebase
-      const docRef = await addDoc(collection(db, 'products'), {
-        ...productToAdd,
-        createdAt: new Date().toISOString()
-      });
+      const productId = await addProduct(productToAdd);
 
-      // Add to local state
       const newProductWithId = {
         ...productToAdd,
-        id: docRef.id
+        id: productId
       } as Product;
 
       const updatedProducts = [...products, newProductWithId];
       setProducts(updatedProducts);
 
-      // Update localStorage to sync with products page
       localStorage.setItem('adminProducts', JSON.stringify(updatedProducts));
-      
-      // Dispatch custom event to notify other components
       window.dispatchEvent(new CustomEvent('productsUpdated'));
 
       setIsModalOpen(false);
@@ -153,16 +137,11 @@ const AdminProducts: React.FC = () => {
     setLoading(true);
 
     try {
-      // Update Firebase if it's a Firebase product
+      // Update Supabase if it's a Supabase product
       if (!editingProduct.id.startsWith('product-') && !editingProduct.id.startsWith('clothing-')) {
-        const productRef = doc(db, 'products', editingProduct.id);
-        await updateDoc(productRef, {
-          ...newProduct,
-          updatedAt: new Date().toISOString()
-        });
+        await updateProduct(editingProduct.id, newProduct);
       }
 
-      // Update local state
       const updatedProducts = products.map(p => 
         p.id === editingProduct.id 
           ? { ...newProduct, id: editingProduct.id } as Product
@@ -170,7 +149,6 @@ const AdminProducts: React.FC = () => {
       );
       setProducts(updatedProducts);
 
-      // Update localStorage
       localStorage.setItem('adminProducts', JSON.stringify(updatedProducts));
       window.dispatchEvent(new CustomEvent('productsUpdated'));
 
@@ -202,16 +180,14 @@ const AdminProducts: React.FC = () => {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      // Delete from Firebase if it's a Firebase product
+      // Delete from Supabase if it's a Supabase product
       if (!product.id.startsWith('product-') && !product.id.startsWith('clothing-')) {
-        await deleteDoc(doc(db, 'products', product.id));
+        await deleteProduct(product.id);
       }
 
-      // Update local state
       const updatedProducts = products.filter(p => p.id !== product.id);
       setProducts(updatedProducts);
 
-      // Update localStorage
       localStorage.setItem('adminProducts', JSON.stringify(updatedProducts));
       window.dispatchEvent(new CustomEvent('productsUpdated'));
     } catch (error) {

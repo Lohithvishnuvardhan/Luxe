@@ -1,12 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Container from '@/components/ui/Container';
 import { Package, Clock, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { getUserOrders, Order } from '@/lib/orders';
-
 
 const Orders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -21,7 +19,7 @@ const Orders: React.FC = () => {
       }
 
       try {
-        const userOrders = await getUserOrders(user.uid);
+        const userOrders = await getUserOrders(user.id);
         setOrders(userOrders);
       } catch (error) {
         console.error('Error fetching orders:', error);
@@ -135,7 +133,7 @@ const Orders: React.FC = () => {
                       <h2 className="text-lg font-medium mb-1">Order #{order.id}</h2>
                       <div className="flex items-center text-gray-600">
                         <Clock size={16} className="mr-1" />
-                        {formatDate(order.date)}
+                        {formatDate(order.created_at)}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

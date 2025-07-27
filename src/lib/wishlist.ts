@@ -1,37 +1,43 @@
-import { collection, query, where, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { supabase } from '../config/supabase';
 import { Product } from '@/types';
 
 export interface WishlistItem {
   id: string;
-  userId: string;
-  productId: string;
+  user_id: string;
+  product_id: string;
   product: Product;
-  addedAt: string;
+  created_at: string;
 }
 
-export const addToWishlist = async (userId: string, product: Product) => {
+export const addToWishlist = async (userId: string, product: Product): Promise<WishlistItem> => {
   try {
-    const wishlistRef = collection(db, 'wishlist');
-    const newItem = {
-      userId,
-      productId: product.id,
-      product,
-      addedAt: new Date().toISOString()
-    };
+    const { data, error } = await supabase
+      .from('wishlist')
+      .insert([{
+        user_id: userId,
+        product_id: product.id,
+        product
+      }])
+      .select()
+      .single();
     
-    const docRef = await addDoc(wishlistRef, newItem);
-    return { id: docRef.id, ...newItem };
+    if (error) throw error;
+    return data;
   } catch (error) {
     console.error('Error adding to wishlist:', error);
     throw error;
   }
 };
 
-export const removeFromWishlist = async (itemId: string) => {
+export const removeFromWishlist = async (userId: string, productId: string): Promise<void> => {
   try {
-    const docRef = doc(db, 'wishlist', itemId);
-    await deleteDoc(docRef);
+    const { error } = await supabase
+      .from('wishlist')
+      .delete()
+      .eq('user_id', userId)
+      .eq('product_id', productId);
+    
+    if (error) throw error;
   } catch (error) {
     console.error('Error removing from wishlist:', error);
     throw error;
@@ -40,24 +46,33 @@ export const removeFromWishlist = async (itemId: string) => {
 
 export const getUserWishlist = async (userId: string): Promise<WishlistItem[]> => {
   try {
-    const wishlistRef = collection(db, 'wishlist');
-    const q = query(
-      wishlistRef, 
-      where('userId', '==', userId),
-      orderBy('addedAt', 'desc')
-    );
+    const { data, error } = await supabase
+      .from('wishlist')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
     
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as WishlistItem));
+    if (error) throw error;
+    return data || [];
   } catch (error) {
     console.error('Error getting user wishlist:', error);
-    throw error;
+    return [];
   }
 };
 
-function orderBy(_arg0: string, _arg1: string): import("@firebase/firestore").QueryConstraint {
-  throw new Error('Function not implemented.');
-}
+export const isInWishlist = async (userId: string, productId: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .from('wishlist')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('product_id', productId)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') throw error;
+    return !!data;
+  } catch (error) {
+    console.error('Error checking wishlist:', error);
+    return false;
+  }
+};

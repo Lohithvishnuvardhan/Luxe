@@ -15,9 +15,7 @@ import {
 import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db, auth } from '@/config/firebase';
-import { updateProfile } from 'firebase/auth';
+import { supabase } from '@/config/supabase';
 
 interface UserProfile {
   firstName: string;
@@ -58,26 +56,46 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     const fetchUserProfile = async () => {
-      if (!user?.uid) return;
+      if (!user?.id) return;
 
       try {
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
         
-        if (userDoc.exists()) {
-          const data = userDoc.data() as UserProfile;
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error fetching user profile:', error);
+          return;
+        }
+
+        if (data) {
           setFormData(prev => ({
             ...prev,
-            ...data
+            ...data,
+            email: user.email || ''
           }));
         } else {
-          // Initialize user document with default data
+          // Create initial profile
           const initialData = {
-            ...formData,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            user_id: user.id,
+            firstName: user.user_metadata?.name?.split(' ')[0] || '',
+            lastName: user.user_metadata?.name?.split(' ').slice(1).join(' ') || '',
+            email: user.email || '',
+            memberSince: user.created_at || new Date().toISOString(),
+            membershipLevel: 'Premium'
           };
-          await setDoc(userDocRef, initialData);
+
+          const { error: insertError } = await supabase
+            .from('user_profiles')
+            .insert([initialData]);
+
+          if (insertError) {
+            console.error('Error creating user profile:', insertError);
+          } else {
+            setFormData(prev => ({ ...prev, ...initialData }));
+          }
         }
       } catch (err) {
         console.error('Error fetching user profile:', err);
@@ -99,7 +117,7 @@ const Profile: React.FC = () => {
   };
 
   const handleSave = async () => {
-    if (!user?.uid) {
+    if (!user?.id) {
       setError('No user found. Please log in again.');
       return;
     }
@@ -109,20 +127,15 @@ const Profile: React.FC = () => {
     setSuccess('');
 
     try {
-      const userDocRef = doc(db, 'users', user.uid);
-      
-      // Update Firestore document
-      await setDoc(userDocRef, {
-        ...formData,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
-
-      // Update Firebase Auth profile
-      if (auth.currentUser) {
-        await updateProfile(auth.currentUser, {
-          displayName: `${formData.firstName} ${formData.lastName}`
+      const { error } = await supabase
+        .from('user_profiles')
+        .upsert({
+          user_id: user.id,
+          ...formData,
+          updated_at: new Date().toISOString()
         });
-      }
+
+      if (error) throw error;
 
       setSuccess('Profile updated successfully');
       setIsEditing(false);
@@ -140,7 +153,6 @@ const Profile: React.FC = () => {
     { id: 'wishlist', label: 'Wishlist', icon: Heart, path: '/wishlist' },
   ];
 
-  // Rest of the component remains exactly the same...
   return (
     <div className="py-24 bg-gray-50">
       <Container>
@@ -156,7 +168,7 @@ const Profile: React.FC = () => {
               <div className="text-center mb-6">
                 <div className="relative w-24 h-24 mx-auto mb-4">
                   <img
-                    src={user?.photoURL || "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=32"}
+                    src={user?.user_metadata?.avatar_url || "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=32"}
                     alt="Profile"
                     className="w-full h-full rounded-full object-cover ring-4 ring-primary-50"
                   />
@@ -312,10 +324,7 @@ const Profile: React.FC = () => {
                       <input
                         type="email"
                         value={formData.email}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
-                        disabled={!isEditing}
+                        disabled={true}
                         className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-50 disabled:text-gray-500"
                       />
                     </div>
@@ -413,7 +422,12 @@ const Profile: React.FC = () => {
 
                   {isEditing && (
                     <div className="flex justify-end gap-4 mt-6">
-                    
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsEditing(false)}
+                      >
+                        Cancel
+                      </Button>
                       <Button
                         variant="primary"
                         onClick={handleSave}

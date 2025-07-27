@@ -42,16 +42,16 @@ const Checkout: React.FC = () => {
     setLoading(true);
 
     try {
-      // Import Firebase functions and auth
+      // Import Supabase functions and auth
       const { createOrder } = await import('@/lib/orders');
-      const { auth } = await import('@/config/firebase');
+      const { useAuth } = await import('@/contexts/AuthContext');
 
-      const currentUser = auth.currentUser;
+      const { user: currentUser } = useAuth();
       
       if (currentUser) {
-        // Create order in Firebase for authenticated users
+        // Create order in Supabase for authenticated users
         await createOrder(
-          currentUser.uid,
+          currentUser.id,
           items,
           totalPrice
         );

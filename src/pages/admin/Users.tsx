@@ -3,8 +3,7 @@ import { motion } from 'framer-motion';
 import Container from '@/components/ui/Container';
 import { Search, MoreVertical, Shield, Ban, Trash2, Edit2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import { doc, collection, getDocs, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
-import { db } from '@/config/firebase';
+import { supabase } from '@/config/supabase';
 
 interface User {
   id: string;
@@ -12,7 +11,7 @@ interface User {
   email: string | null;
   role: 'admin' | 'customer';
   status: 'active' | 'suspended';
-  joinDate: string;
+  created_at: string;
   orders: number;
 }
 
@@ -30,17 +29,23 @@ const AdminUsers: React.FC = () => {
 
   const fetchUsers = async () => {
     try {
-      const usersCollection = collection(db, 'users');
-      const userDocs = await getDocs(usersCollection);
-      const usersData = userDocs.docs.map(doc => ({
-        id: doc.id,
-        name: doc.data().name || 'Unknown User',
-        email: doc.data().email || 'No email',
-        role: doc.data().role || 'customer',
-        status: doc.data().status || 'active',
-        joinDate: doc.data().joinDate || new Date().toISOString(),
-        orders: doc.data().orders || 0
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const usersData = data.map(user => ({
+        id: user.id,
+        name: user.name || 'Unknown User',
+        email: user.email || 'No email',
+        role: user.role || 'customer',
+        status: user.status || 'active',
+        created_at: user.created_at || new Date().toISOString(),
+        orders: user.orders || 0
       } as User));
+
       setUsers(usersData);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -51,18 +56,28 @@ const AdminUsers: React.FC = () => {
 
   const updateUserRole = async (userId: string, newRole: 'admin' | 'customer') => {
     try {
-      const userRef = doc(db, 'users', userId);
-      await updateDoc(userRef, { role: newRole });
-      
+      const { error } = await supabase
+        .from('users')
+        .update({ role: newRole })
+        .eq('id', userId);
+
+      if (error) throw error;
+
       // Handle admin collection updates
-      const adminRef = doc(db, 'admins', userId);
       if (newRole === 'admin') {
-        await setDoc(adminRef, { role: 'admin' });
+        const { error: adminError } = await supabase
+          .from('admins')
+          .upsert({ user_id: userId, role: 'admin' });
+        
+        if (adminError) throw adminError;
       } else {
-        try {
-          await deleteDoc(adminRef);
-        } catch (error) {
-          console.error('Error removing admin document:', error);
+        const { error: adminError } = await supabase
+          .from('admins')
+          .delete()
+          .eq('user_id', userId);
+        
+        if (adminError && adminError.code !== 'PGRST116') {
+          throw adminError;
         }
       }
       
@@ -77,8 +92,12 @@ const AdminUsers: React.FC = () => {
 
   const updateUserStatus = async (userId: string, newStatus: 'active' | 'suspended') => {
     try {
-      const userRef = doc(db, 'users', userId);
-      await updateDoc(userRef, { status: newStatus });
+      const { error } = await supabase
+        .from('users')
+        .update({ status: newStatus })
+        .eq('id', userId);
+
+      if (error) throw error;
       
       // Update local state
       setUsers(users.map(user => 
@@ -93,12 +112,19 @@ const AdminUsers: React.FC = () => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
 
     try {
-      await deleteDoc(doc(db, 'users', userId));
-      try {
-        await deleteDoc(doc(db, 'admins', userId));
-      } catch (error) {
-        console.error('Error deleting admin document:', error);
-      }
+      const { error } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      // Also try to delete from admins table
+      await supabase
+        .from('admins')
+        .delete()
+        .eq('user_id', userId);
+
       setUsers(users.filter(user => user.id !== userId));
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -243,7 +269,7 @@ const AdminUsers: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(user.joinDate).toLocaleDateString()}
+                        {new Date(user.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {user.orders}

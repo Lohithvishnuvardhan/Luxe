@@ -3,23 +3,7 @@ import { motion } from 'framer-motion';
 import Container from '@/components/ui/Container';
 import { Search, Eye, Trash2, X } from 'lucide-react';
 import Button from '@/components/ui/Button';
-
-interface OrderItem {
-  id: string;
-  name: string;
-  quantity: number;
-  price: number;
-  currency: string;
-  imageUrl: string;
-}
-
-interface Order {
-  id: string;
-  date: string;
-  items: OrderItem[];
-  total: number;
-  status: string;
-}
+import { getAllOrders, Order } from '@/lib/orders';
 
 const AdminOrders: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,18 +14,7 @@ const AdminOrders: React.FC = () => {
   useEffect(() => {
     const fetchAllOrders = async () => {
       try {
-        const { collection, getDocs, orderBy, query } = await import('firebase/firestore');
-        const { db } = await import('@/config/firebase');
-        
-        const ordersRef = collection(db, 'orders');
-        const q = query(ordersRef, orderBy('date', 'desc'));
-        const querySnapshot = await getDocs(q);
-        
-        const allOrders = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as Order));
-        
+        const allOrders = await getAllOrders();
         setOrders(allOrders);
       } catch (error) {
         console.error('Error fetching orders:', error);
@@ -148,16 +121,16 @@ const AdminOrders: React.FC = () => {
                         {order.id}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(order.date)}
+                        {formatDate(order.created_at)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         ${order.total.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          order.status === 'Processing'
+                          order.status === 'processing'
                             ? 'bg-yellow-100 text-yellow-800'
-                            : order.status === 'Shipped'
+                            : order.status === 'shipped'
                             ? 'bg-blue-100 text-blue-800'
                             : 'bg-green-100 text-green-800'
                         }`}>
@@ -212,7 +185,7 @@ const AdminOrders: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-sm text-gray-600">Date</p>
-                        <p className="font-medium">{formatDate(selectedOrder.date)}</p>
+                        <p className="font-medium">{formatDate(selectedOrder.created_at)}</p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-600">Status</p>
