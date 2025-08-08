@@ -6,11 +6,16 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   signup: (email: string, password: string, name: string) => Promise<void>;
+  signupWithProvider: (provider: 'google' | 'github' | 'facebook' | 'apple') => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
+  loginWithProvider: (provider: 'google' | 'github' | 'facebook' | 'apple') => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
+  resendVerification: () => Promise<void>;
   loading: boolean;
   isAdmin: boolean;
+  isEmailVerified: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -26,6 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
 
   const checkAdminStatus = async (userId: string) => {
     try {
@@ -52,6 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      setIsEmailVerified(session?.user?.email_confirmed_at ? true : false);
       if (session?.user) {
         checkAdminStatus(session.user.id).then(setIsAdmin);
       }
@@ -63,6 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        setIsEmailVerified(session?.user?.email_confirmed_at ? true : false);
         
         if (session?.user) {
           const adminStatus = await checkAdminStatus(session.user.id);
@@ -85,6 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         } else {
           setIsAdmin(false);
+          setIsEmailVerified(false);
         }
         setLoading(false);
       }
@@ -100,7 +109,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       options: {
         data: {
           name: name
-        }
+        },
+        emailRedirectTo: `${window.location.origin}/auth/verify-email`
       }
     });
 
@@ -124,6 +134,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signupWithProvider = async (provider: 'google' | 'github' | 'facebook' | 'apple') => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    });
+
+    if (error) throw error;
+  };
   const login = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -133,10 +153,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) throw error;
   };
 
+  const loginWithProvider = async (provider: 'google' | 'github' | 'facebook' | 'apple') => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    });
+
+    if (error) throw error;
+  };
   const logout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     setIsAdmin(false);
+    setIsEmailVerified(false);
   };
 
   const resetPassword = async (email: string) => {
@@ -147,15 +178,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) throw error;
   };
 
+  const updatePassword = async (password: string) => {
+    const { error } = await supabase.auth.updateUser({
+      password: password
+    });
+
+    if (error) throw error;
+  };
+
+  const resendVerification = async () => {
+    if (!user?.email) throw new Error('No user email found');
+    
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: user.email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/verify-email`
+      }
+    });
+
+    if (error) throw error;
+  };
   const value = {
     user,
     session,
     signup,
+    signupWithProvider,
     login,
+    loginWithProvider,
     logout,
     resetPassword,
+    updatePassword,
+    resendVerification,
     loading,
-    isAdmin
+    isAdmin,
+    isEmailVerified
   };
 
   return (

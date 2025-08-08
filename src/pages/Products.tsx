@@ -8,8 +8,7 @@ import { Link } from 'react-router-dom';
 import { CATEGORIES } from '@/data/categories';
 import { Product } from '@/types';
 import { ALL_PRODUCTS } from '@/data/products';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '@/config/firebase';
+import { supabase } from '@/config/supabase';
 
 const Products: React.FC = () => {
   const { addItem } = useCart();
@@ -36,13 +35,13 @@ const Products: React.FC = () => {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'products'));
-        const firebaseProducts = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Product[];
+        const { data: supabaseProducts, error } = await supabase
+          .from('products')
+          .select('*');
 
-        const allProducts = [...ALL_PRODUCTS, ...firebaseProducts];
+        if (error) throw error;
+
+        const allProducts = [...ALL_PRODUCTS, ...(supabaseProducts || [])];
         setProducts(allProducts);
         localStorage.setItem('adminProducts', JSON.stringify(allProducts));
       } catch (error) {

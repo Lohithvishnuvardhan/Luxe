@@ -10,7 +10,7 @@ const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { items } = useCart();
-  const { user, isAdmin, logout } = useAuth();
+  const { user, isAdmin, isEmailVerified, logout } = useAuth();
   const navigate = useNavigate();
   
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
@@ -75,6 +75,13 @@ const Header: React.FC = () => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
+            {user && !isEmailVerified && (
+              <div className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">
+                <Link to="/auth/verify-email" className="hover:underline">
+                  Verify Email
+                </Link>
+              </div>
+            )}
             <button className="h-12 w-12 flex items-center justify-center rounded-full bg-primary-600 text-white hover:bg-accent-500 transition-all duration-300 transform hover:scale-105">
               <Search size={20} />
             </button>

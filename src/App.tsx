@@ -27,6 +27,8 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import Login from './pages/auth/Login';
 import ResetPassword from './pages/auth/ResetPassword';
 import Signup from './pages/auth/Signup';
+import VerifyEmail from './pages/auth/VerifyEmail';
+import AuthCallback from './pages/auth/AuthCallback';
 import AdminLayout from './components/layout/Layout';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminProducts from './pages/admin/Products';
@@ -61,6 +63,8 @@ function App() {
                 <Route path="signup" element={<Signup />} />
                 <Route path="forgot-password" element={<ForgotPassword />} />
                 <Route path="reset-password" element={<ResetPassword />} />
+                <Route path="auth/verify-email" element={<VerifyEmail />} />
+                <Route path="auth/callback" element={<AuthCallback />} />
                 <Route path="about" element={<About />} />
                 <Route path="contact" element={<Contact />} />
                 <Route path="faq" element={<FAQ />} />

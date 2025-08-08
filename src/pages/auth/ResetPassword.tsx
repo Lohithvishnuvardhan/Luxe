@@ -1,15 +1,15 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Lock, KeyRound } from 'lucide-react';
 import Container from '@/components/ui/Container';
 import Button from '@/components/ui/Button';
-import { auth } from '@/config/firebase';
-import { confirmPasswordReset } from 'firebase/auth';
+import { supabase } from '@/config/supabase';
 
 const ResetPassword: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,19 +26,22 @@ const ResetPassword: React.FC = () => {
       return;
     }
 
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      setLoading(false);
+      return;
+    }
     try {
-      // Get the action code from the URL
-      const searchParams = new URLSearchParams(window.location.search);
-      const oobCode = searchParams.get('oobCode');
+      const { error } = await supabase.auth.updateUser({
+        password: password
+      });
 
-      if (!oobCode) {
-        throw new Error('No reset code found in URL');
-      }
-
-      await confirmPasswordReset(auth, oobCode, password);
+      if (error) throw error;
+      
+      alert('Password updated successfully!');
       navigate('/auth/login');
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Failed to reset password');
     } finally {
       setLoading(false);
     }
